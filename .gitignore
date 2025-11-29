@@ -1,0 +1,30 @@
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Environment files
+.env
+.env.local
+
+# Claude Code
+.claude/*
+CLAUDE.md
+TODO.md
+
+# UERANSIM - external testing tool (if added locally)
+UERANSIM/

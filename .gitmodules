@@ -1,0 +1,9 @@
+[submodule "amf"]
+	path = amf
+	url = https://github.com/gholtzap/amf.git
+[submodule "hss"]
+	path = hss
+	url = https://github.com/gholtzap/udm-typescript.git
+[submodule "nrf"]
+	path = nrf
+	url = https://github.com/gholtzap/nrf.git
