@@ -3,7 +3,7 @@
 	url = https://github.com/gholtzap/amf.git
 [submodule "udm"]
 	path = udm
-	url = https://github.com/gholtzap/udm-typescript.git
+	url = https://github.com/gholtzap/udm
 [submodule "nrf"]
 	path = nrf
 	url = https://github.com/gholtzap/nrf.git
