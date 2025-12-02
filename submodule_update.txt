@@ -1,0 +1,4 @@
+git submodule update --remote --merge
+git add .
+git commit -m "Update submodules"
+git push origin master
