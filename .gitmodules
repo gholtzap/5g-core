@@ -13,3 +13,6 @@
 [submodule "ausf"]
 	path = ausf
 	url = https://github.com/gholtzap/ausf
+[submodule "smf"]
+	path = smf
+	url = https://github.com/gholtzap/smf
