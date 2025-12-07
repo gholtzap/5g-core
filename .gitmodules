@@ -1,18 +1,24 @@
 [submodule "amf"]
 	path = amf
 	url = https://github.com/gholtzap/amf.git
+	branch = master
 [submodule "udm"]
 	path = udm
 	url = https://github.com/gholtzap/udm
+	branch = master
 [submodule "nrf"]
 	path = nrf
 	url = https://github.com/gholtzap/nrf.git
+	branch = main
 [submodule "nssf"]
 	path = nssf
 	url = https://github.com/gholtzap/nssf
+	branch = master
 [submodule "ausf"]
 	path = ausf
 	url = https://github.com/gholtzap/ausf
+	branch = master
 [submodule "smf"]
 	path = smf
 	url = https://github.com/gholtzap/smf
+	branch = master
