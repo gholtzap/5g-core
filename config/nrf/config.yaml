@@ -1,0 +1,35 @@
+server:
+  port: 8080
+  fqdn: nrf.5gcore.local
+  ipAddress: 10.53.1.40
+
+database:
+  type: mongodb
+  uri: mongodb+srv://gholtzap:REDACTED@cluster0.rcdmv8e.mongodb.net/
+  name: nrf
+
+heartbeat:
+  defaultTimer: 30
+  gracePeriod: 10
+  checkInterval: 5
+
+logging:
+  level: info
+  format: text
+
+security:
+  tlsEnabled: false
+  mtlsEnabled: false
+  oauth:
+    enabled: false
+    tokenExpiry: 3600
+
+notification:
+  retryAttempts: 3
+  retryDelay: 5000
+  timeout: 10000
+
+rateLimit:
+  enabled: true
+  windowMs: 60000
+  maxRequests: 1000
