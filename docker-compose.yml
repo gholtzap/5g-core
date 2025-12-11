@@ -8,11 +8,35 @@ networks:
         - subnet: 10.53.1.0/24
 
 services:
-  # NRF - Network Repository Function (starts first, no dependencies)
+  # MongoDB - Database for network functions
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    hostname: mongodb
+    networks:
+      5g-core-net:
+        ipv4_address: 10.53.1.5
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=5gcore
+    volumes:
+      - mongodb-data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NRF - Network Repository Function
   nrf:
     build: ./nrf
     container_name: nrf
     hostname: nrf
+    depends_on:
+      mongodb:
+        condition: service_healthy
     networks:
       5g-core-net:
         ipv4_address: ${NRF_IP}
@@ -36,6 +60,8 @@ services:
     container_name: ausf
     hostname: ausf
     depends_on:
+      mongodb:
+        condition: service_healthy
       nrf:
         condition: service_healthy
     networks:
@@ -53,6 +79,8 @@ services:
     container_name: udm
     hostname: udm
     depends_on:
+      mongodb:
+        condition: service_healthy
       nrf:
         condition: service_healthy
     networks:
@@ -70,6 +98,8 @@ services:
     container_name: nssf
     hostname: nssf
     depends_on:
+      mongodb:
+        condition: service_healthy
       nrf:
         condition: service_healthy
     networks:
@@ -119,6 +149,8 @@ services:
     container_name: smf
     hostname: smf
     depends_on:
+      mongodb:
+        condition: service_healthy
       nrf:
         condition: service_healthy
       udm:
@@ -178,3 +210,6 @@ services:
     privileged: true
     stdin_open: true
     tty: true
+
+volumes:
+  mongodb-data:
