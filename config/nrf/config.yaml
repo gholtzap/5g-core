@@ -5,7 +5,7 @@ server:
 
 database:
   type: mongodb
-  uri: mongodb+srv://gholtzap:hvuHKLjAUArOKP0l@cluster0.rcdmv8e.mongodb.net/
+  uri: mongodb://mongodb:27017
   name: nrf
 
 heartbeat:
