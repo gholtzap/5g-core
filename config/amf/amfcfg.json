@@ -1,0 +1,125 @@
+{
+  "info": {
+    "version": "1.0.0",
+    "description": "AMF configuration for 5G Core Test Environment"
+  },
+  "configuration": {
+    "amfName": "AMF",
+    "ngapIpList": [
+      "10.53.1.10"
+    ],
+    "ngapPort": 38412,
+    "sbi": {
+      "scheme": "http",
+      "registerIPv4": "10.53.1.10",
+      "bindingIPv4": "10.53.1.10",
+      "port": 8000
+    },
+    "serviceNameList": [
+      "namf-comm",
+      "namf-evts",
+      "namf-mt",
+      "namf-loc",
+      "namf-oam"
+    ],
+    "servedGuamiList": [
+      {
+        "plmnId": {
+          "mcc": "999",
+          "mnc": "70"
+        },
+        "amfId": "cafe00"
+      }
+    ],
+    "supportTaiList": [
+      {
+        "plmnId": {
+          "mcc": "999",
+          "mnc": "70"
+        },
+        "tac": "000001"
+      }
+    ],
+    "plmnSupportList": [
+      {
+        "plmnId": {
+          "mcc": "999",
+          "mnc": "70"
+        },
+        "sNssaiList": [
+          {
+            "sst": 1
+          }
+        ]
+      }
+    ],
+    "supportDnnList": [
+      "internet"
+    ],
+    "nrfUri": "http://10.53.1.40:8080",
+    "security": {
+      "integrityOrder": [
+        "NIA2",
+        "NIA1",
+        "NIA0"
+      ],
+      "cipheringOrder": [
+        "NEA2",
+        "NEA1",
+        "NEA0"
+      ]
+    },
+    "networkName": {
+      "full": "5G Test Network",
+      "short": "5GTN"
+    },
+    "t3502Value": 720,
+    "t3512Value": 3600,
+    "non3gppDeregistrationTimerValue": 3240,
+    "t3513": {
+      "enable": true,
+      "expireTime": 6,
+      "maxRetryTimes": 4
+    },
+    "t3517": {
+      "enable": true,
+      "expireTime": 6,
+      "maxRetryTimes": 4
+    },
+    "t3522": {
+      "enable": true,
+      "expireTime": 6,
+      "maxRetryTimes": 4
+    },
+    "t3540": {
+      "enable": true,
+      "expireTime": 10,
+      "maxRetryTimes": 4
+    },
+    "t3550": {
+      "enable": true,
+      "expireTime": 6,
+      "maxRetryTimes": 4
+    },
+    "t3555": {
+      "enable": true,
+      "expireTime": 6,
+      "maxRetryTimes": 4
+    },
+    "t3560": {
+      "enable": true,
+      "expireTime": 6,
+      "maxRetryTimes": 4
+    },
+    "t3565": {
+      "enable": true,
+      "expireTime": 6,
+      "maxRetryTimes": 4
+    },
+    "t3570": {
+      "enable": true,
+      "expireTime": 6,
+      "maxRetryTimes": 4
+    }
+  }
+}

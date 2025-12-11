@@ -1,0 +1,180 @@
+version: '3.8'
+
+networks:
+  5g-core-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.53.1.0/24
+
+services:
+  # NRF - Network Repository Function (starts first, no dependencies)
+  nrf:
+    build: ./nrf
+    container_name: nrf
+    hostname: nrf
+    networks:
+      5g-core-net:
+        ipv4_address: ${NRF_IP}
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./config/nrf:/app/config:ro
+    environment:
+      - NODE_ENV=production
+      - CONFIG_PATH=/app/config/config.yaml
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/nnrf-nfm/v1/nf-instances"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # AUSF - Authentication Server Function
+  ausf:
+    build: ./ausf
+    container_name: ausf
+    hostname: ausf
+    depends_on:
+      nrf:
+        condition: service_healthy
+    networks:
+      5g-core-net:
+        ipv4_address: ${AUSF_IP}
+    ports:
+      - "8081:8080"
+    env_file:
+      - ./config/ausf/.env
+    restart: unless-stopped
+
+  # UDM - Unified Data Management
+  udm:
+    build: ./udm
+    container_name: udm
+    hostname: udm
+    depends_on:
+      nrf:
+        condition: service_healthy
+    networks:
+      5g-core-net:
+        ipv4_address: ${UDM_IP}
+    ports:
+      - "8084:8080"
+    env_file:
+      - ./config/udm/.env
+    restart: unless-stopped
+
+  # NSSF - Network Slice Selection Function
+  nssf:
+    build: ./nssf
+    container_name: nssf
+    hostname: nssf
+    depends_on:
+      nrf:
+        condition: service_healthy
+    networks:
+      5g-core-net:
+        ipv4_address: ${NSSF_IP}
+    ports:
+      - "8083:8080"
+    env_file:
+      - ./config/nssf/.env
+    restart: unless-stopped
+
+  # AMF - Access and Mobility Management Function
+  amf:
+    build: ./amf
+    container_name: amf
+    hostname: amf
+    depends_on:
+      nrf:
+        condition: service_healthy
+      ausf:
+        condition: service_started
+      udm:
+        condition: service_started
+      nssf:
+        condition: service_started
+    networks:
+      5g-core-net:
+        ipv4_address: ${AMF_IP}
+    ports:
+      - "8000:8000"      # SBI interface
+      - "38412:38412/sctp"  # NGAP interface (N2)
+    volumes:
+      - ./config/amf:/app/config:ro
+    environment:
+      - CONFIG_FILE=/app/config/amfcfg.json
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.sctp.rto_min=200
+      - net.sctp.rto_initial=1000
+      - net.sctp.rto_max=2000
+
+  # SMF - Session Management Function
+  smf:
+    build: ./smf
+    container_name: smf
+    hostname: smf
+    depends_on:
+      nrf:
+        condition: service_healthy
+      udm:
+        condition: service_started
+    networks:
+      5g-core-net:
+        ipv4_address: ${SMF_IP}
+    ports:
+      - "8080:8080"      # SBI interface
+      - "8805:8805/udp"  # PFCP interface (N4)
+    env_file:
+      - ./config/smf/.env
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+
+  # UERANSIM gNB - 5G Base Station Simulator
+  ueransim-gnb:
+    build: ./docker/ueransim
+    container_name: ueransim-gnb
+    hostname: ueransim-gnb
+    depends_on:
+      amf:
+        condition: service_started
+    networks:
+      5g-core-net:
+        ipv4_address: ${NR_GNB_IP}
+    volumes:
+      - ./config/ueransim/gnb.yaml:/config/gnb.yaml:ro
+      - ./docker/ueransim/start-gnb.sh:/start-gnb.sh:ro
+    command: ["/bin/bash", "/start-gnb.sh"]
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    privileged: true
+    stdin_open: true
+    tty: true
+
+  # UERANSIM UE - 5G User Equipment Simulator
+  ueransim-ue:
+    build: ./docker/ueransim
+    container_name: ueransim-ue
+    hostname: ueransim-ue
+    depends_on:
+      ueransim-gnb:
+        condition: service_started
+    networks:
+      5g-core-net:
+        ipv4_address: ${NR_UE_IP}
+    volumes:
+      - ./config/ueransim/ue.yaml:/config/ue.yaml:ro
+      - ./docker/ueransim/start-ue.sh:/start-ue.sh:ro
+    command: ["/bin/bash", "/start-ue.sh"]
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    privileged: true
+    stdin_open: true
+    tty: true

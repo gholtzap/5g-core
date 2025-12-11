@@ -1,0 +1,73 @@
+# Git
+.git
+.gitignore
+.gitmodules
+
+# Documentation
+*.md
+README*
+LICENSE
+CLAUDE.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+log/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Testing
+coverage/
+.nyc_output
+*.test.js
+
+# Environment files (we'll copy specific ones as needed)
+.env.local
+.env.*.local
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test configs (use config/ directory instead)
+test-config/
