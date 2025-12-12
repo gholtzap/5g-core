@@ -129,7 +129,7 @@ services:
       5g-core-net:
         ipv4_address: ${AMF_IP}
     ports:
-      - "8000:8000"      # SBI interface
+      - "8086:8000"      # SBI interface
       - "38412:38412/sctp"  # NGAP interface (N2)
     volumes:
       - ./config/amf:/app/config:ro
