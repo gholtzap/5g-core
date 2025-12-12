@@ -1,19 +1,8 @@
-# Quick Start - Manual Commands
+# Quick Start
 
-If scripts are giving you trouble, run these commands directly in Git Bash or PowerShell:
-
-## Prerequisites
+## 1. Build All Images
 
 ```bash
-cd c:/Users/Gavin/dev/5g-core
-```
-
-## 1. Build All Images (See All Errors)
-
-Instead of `./scripts/build-all.sh`, run:
-
-```bash
-# Build each service (errors will be visible)
 docker-compose build nrf
 docker-compose build ausf
 docker-compose build udm
@@ -29,8 +18,6 @@ Or build everything at once:
 docker-compose build
 ```
 
-**If a build fails**, you'll see exactly which one and why!
-
 ## 2. Provision Subscriber
 
 ```bash
@@ -43,13 +30,10 @@ node scripts/provision-subscriber.js
 Instead of `./scripts/start-core.sh`, run:
 
 ```bash
-# Start NRF first
 docker-compose up nrf
 
-# Once NRF is healthy (you'll see it in logs), open a NEW terminal and run:
 docker-compose up ausf udm nssf
 
-# Once those are up, open ANOTHER terminal and run:
 docker-compose up amf smf
 ```
 
@@ -107,31 +91,6 @@ docker network ls
 docker network inspect 5g-core_5g-core-net
 ```
 
-## 7. Troubleshooting Commands
-
-### Restart a Specific Service
-
-```bash
-docker-compose restart amf
-```
-
-### Rebuild a Specific Service
-
-```bash
-docker-compose up -d --build amf
-```
-
-### Stop Everything
-
-```bash
-docker-compose down
-```
-
-### Stop and Remove Volumes (Fresh Start)
-
-```bash
-docker-compose down -v
-```
 
 ### View Real-Time Container Output
 
@@ -183,59 +142,11 @@ docker-compose up ueransim-gnb ueransim-ue
 # Press Ctrl+C when done
 ```
 
-## 9. Debugging Specific Issues
 
-### If NRF won't start:
 
-```bash
-docker-compose logs nrf
-# Look for MongoDB connection errors
+appendix
+
 ```
-
-### If AMF won't start:
-
-```bash
-docker-compose logs amf
-# Look for SCTP or NGAP errors
+docker compose build
+docker compose up
 ```
-
-### If builds fail:
-
-```bash
-# Build with verbose output
-docker-compose build --no-cache --progress=plain amf
-```
-
-### If containers keep restarting:
-
-```bash
-# See why they're failing
-docker-compose logs <service-name>
-
-# Remove restart policy temporarily
-docker-compose up --no-restart amf
-```
-
-## 10. Useful Docker Commands
-
-```bash
-# Remove all stopped containers
-docker container prune
-
-# Remove unused images
-docker image prune
-
-# Remove everything (fresh start)
-docker system prune -a
-
-# See disk usage
-docker system df
-```
-
-## Pro Tip: Use Multiple Terminals
-
-1. **Terminal 1**: Run `docker-compose up amf` (watch AMF logs)
-2. **Terminal 2**: Run `docker-compose up smf` (watch SMF logs)
-3. **Terminal 3**: Run `docker-compose up ueransim-ue` (watch UE attach)
-
-This way you can see exactly what's happening in each component!
