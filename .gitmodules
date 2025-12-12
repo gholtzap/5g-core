@@ -22,3 +22,7 @@
 	path = smf
 	url = https://github.com/gholtzap/smf
 	branch = master
+[submodule "upf"]
+	path = upf
+	url = https://github.com/gholtzap/upf
+	branch = master
