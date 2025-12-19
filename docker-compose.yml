@@ -167,6 +167,33 @@ services:
     cap_add:
       - NET_ADMIN
 
+  # UPF - User Plane Function
+  upf:
+    build: ./upf
+    container_name: upf
+    hostname: upf
+    depends_on:
+      nrf:
+        condition: service_healthy
+      smf:
+        condition: service_started
+    networks:
+      5g-core-net:
+        ipv4_address: ${UPF_IP}
+    ports:
+      - "8087:8080"      # SBI interface
+      - "2152:2152/udp"  # GTP-U interface (N3)
+      - "8806:8806/udp"  # PFCP interface (N4)
+    volumes:
+      - ./upf/config.yaml:/app/config.yaml:ro
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.ip_forward=1
+
   # UERANSIM gNB - 5G Base Station Simulator
   ueransim-gnb:
     build: ./docker/ueransim
