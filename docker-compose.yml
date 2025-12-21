@@ -8,7 +8,6 @@ networks:
         - subnet: 10.53.1.0/24
 
 services:
-  # MongoDB - Database for network functions
   mongodb:
     image: mongo:7.0
     container_name: mongodb
@@ -29,7 +28,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # NRF - Network Repository Function
   nrf:
     build: ./nrf
     container_name: nrf
@@ -54,7 +52,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # AUSF - Authentication Server Function
   ausf:
     build: ./ausf
     container_name: ausf
@@ -73,7 +70,6 @@ services:
       - ./config/ausf/.env
     restart: unless-stopped
 
-  # UDM - Unified Data Management
   udm:
     build: ./udm
     container_name: udm
@@ -92,7 +88,6 @@ services:
       - ./config/udm/.env
     restart: unless-stopped
 
-  # NSSF - Network Slice Selection Function
   nssf:
     build: ./nssf
     container_name: nssf
@@ -111,7 +106,6 @@ services:
       - ./config/nssf/.env
     restart: unless-stopped
 
-  # AMF - Access and Mobility Management Function
   amf:
     build: ./amf
     container_name: amf
@@ -129,8 +123,8 @@ services:
       5g-core-net:
         ipv4_address: ${AMF_IP}
     ports:
-      - "8086:8000"      # SBI interface
-      - "38412:38412/sctp"  # NGAP interface (N2)
+      - "8086:8000"      
+      - "38412:38412/sctp" 
     volumes:
       - ./config/amf:/app/config:ro
     environment:
@@ -143,7 +137,6 @@ services:
       - net.sctp.rto_initial=1000
       - net.sctp.rto_max=2000
 
-  # SMF - Session Management Function
   smf:
     build: ./smf
     container_name: smf
@@ -159,15 +152,14 @@ services:
       5g-core-net:
         ipv4_address: ${SMF_IP}
     ports:
-      - "8085:8080"      # SBI interface
-      - "8805:8805/udp"  # PFCP interface (N4)
+      - "8085:8080"     
+      - "8805:8805/udp" 
     env_file:
       - ./config/smf/.env
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
 
-  # UPF - User Plane Function
   upf:
     build: ./upf
     container_name: upf
@@ -181,9 +173,9 @@ services:
       5g-core-net:
         ipv4_address: ${UPF_IP}
     ports:
-      - "8087:8080"      # SBI interface
-      - "2152:2152/udp"  # GTP-U interface (N3)
-      - "8806:8806/udp"  # PFCP interface (N4)
+      - "8087:8080"     
+      - "2152:2152/udp" 
+      - "8806:8806/udp" 
     volumes:
       - ./upf/config.yaml:/app/config.yaml:ro
     environment:
@@ -194,7 +186,6 @@ services:
     sysctls:
       - net.ipv4.ip_forward=1
 
-  # UERANSIM gNB - 5G Base Station Simulator
   ueransim-gnb:
     build: ./docker/ueransim
     container_name: ueransim-gnb
@@ -216,7 +207,6 @@ services:
     stdin_open: true
     tty: true
 
-  # UERANSIM UE - 5G User Equipment Simulator
   ueransim-ue:
     build: ./docker/ueransim
     container_name: ueransim-ue
