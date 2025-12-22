@@ -19,16 +19,16 @@ logs/
 tmp/
 temp/
 
-# Environment files
-.env
-.env.local
+# Environment files (only root .env, allow config/*/.env)
+/.env
+/.env.local
 
 # Claude Code
 .claude/*
 CLAUDE.md
 TODO.md
 
-# UERANSIM - external testing tool (if added locally)
-UERANSIM/
+# UERANSIM - external testing tool (if added locally, only in root)
+/UERANSIM/
 
 submodule_update.ps1

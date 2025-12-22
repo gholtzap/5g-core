@@ -29,7 +29,9 @@ services:
       retries: 5
 
   nrf:
-    build: ./nrf
+    build:
+      context: ./nrf
+      dockerfile: ../docker/nrf/Dockerfile
     container_name: nrf
     hostname: nrf
     depends_on:
@@ -53,7 +55,9 @@ services:
       retries: 5
 
   ausf:
-    build: ./ausf
+    build:
+      context: ./ausf
+      dockerfile: ../docker/ausf/Dockerfile
     container_name: ausf
     hostname: ausf
     depends_on:
@@ -71,7 +75,9 @@ services:
     restart: unless-stopped
 
   udm:
-    build: ./udm
+    build:
+      context: ./udm
+      dockerfile: ../docker/udm/Dockerfile
     container_name: udm
     hostname: udm
     depends_on:
@@ -89,7 +95,9 @@ services:
     restart: unless-stopped
 
   nssf:
-    build: ./nssf
+    build:
+      context: ./nssf
+      dockerfile: ../docker/nssf/Dockerfile
     container_name: nssf
     hostname: nssf
     depends_on:
@@ -107,7 +115,9 @@ services:
     restart: unless-stopped
 
   amf:
-    build: ./amf
+    build:
+      context: ./amf
+      dockerfile: ../docker/amf/Dockerfile
     container_name: amf
     hostname: amf
     depends_on:
@@ -138,7 +148,9 @@ services:
       - net.sctp.rto_max=2000
 
   smf:
-    build: ./smf
+    build:
+      context: ./smf
+      dockerfile: ../docker/smf/Dockerfile
     container_name: smf
     hostname: smf
     depends_on:
@@ -161,7 +173,9 @@ services:
       - NET_ADMIN
 
   upf:
-    build: ./upf
+    build:
+      context: ./upf
+      dockerfile: ../docker/upf/Dockerfile
     container_name: upf
     hostname: upf
     depends_on:
