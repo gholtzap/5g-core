@@ -8,7 +8,7 @@ RUN mkdir src && echo "fn main() {}" > src/main.rs && cargo build --release && r
 
 COPY . .
 
-RUN cargo build --release
+RUN touch src/main.rs && cargo build --release
 
 FROM debian:bookworm-slim
 
@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 COPY --from=builder /app/target/release/ausf /app/ausf
+COPY --from=builder /app/context /app/context
 
 EXPOSE 8080
 
