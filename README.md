@@ -10,6 +10,19 @@ A complete 5G Core Network implementation with the following Network Functions:
 - **UPF** (User Plane Function) - Rust
 - **UERANSIM** (RAN and UE Simulator)
 
+
+## Quick Start
+
+For automated setup, use the setup script:
+
+```bash
+git clone --recursive https://github.com/gholtzap/5g-core.git
+cd 5g-core
+./scripts/setup.sh
+```
+
+For manual installation, follow the steps below.
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
@@ -38,23 +51,6 @@ node --version
 npm --version
 ```
 
-## Quick Start
-
-For automated setup, use the setup script:
-
-```bash
-git clone --recursive https://github.com/gholtzap/5g-core.git
-cd 5g-core
-./scripts/setup.sh
-```
-
-The setup script will:
-- Check prerequisites
-- Initialize git submodules
-- Configure environment variables
-- Build all Docker images
-
-For manual installation, follow the detailed steps below.
 
 ## Installation Steps
 
