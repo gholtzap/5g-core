@@ -1,13 +1,13 @@
 # 5G Core Network Implementation
 
 A complete 5G Core Network implementation with the following Network Functions:
-- **NRF** (Network Repository Function) ![TypeScript](img/typescript.svg)
-- **AUSF** (Authentication Server Function) ![Rust](img/rust.png)
-- **UDM** (Unified Data Management) ![TypeScript](img/typescript.svg)
-- **NSSF** (Network Slice Selection Function) ![TypeScript](img/typescript.svg)
-- **AMF** (Access and Mobility Management Function) ![Go](img/go.svg)
-- **SMF** (Session Management Function) ![Rust](img/rust.png)
-- **UPF** (User Plane Function) ![Rust](img/rust.png)
+- **NRF** (Network Repository Function) <img src="img/typescript.svg" alt="TypeScript" width="20" height="20">
+- **AUSF** (Authentication Server Function) <img src="img/rust.png" alt="Rust" width="20" height="20">
+- **UDM** (Unified Data Management) <img src="img/typescript.svg" alt="TypeScript" width="20" height="20">
+- **NSSF** (Network Slice Selection Function) <img src="img/typescript.svg" alt="TypeScript" width="20" height="20">
+- **AMF** (Access and Mobility Management Function) <img src="img/go.svg" alt="Go" width="20" height="20">
+- **SMF** (Session Management Function) <img src="img/rust.png" alt="Rust" width="20" height="20">
+- **UPF** (User Plane Function) <img src="img/rust.png" alt="Rust" width="20" height="20">
 
 
 ## Quick Start
