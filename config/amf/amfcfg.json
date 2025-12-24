@@ -41,14 +41,14 @@
     "relative_capacity": 255
   },
   "sbi": {
-    "bind_addr": "10.53.1.10:8000",
+    "bind_addr": "0.0.0.0:8000",
     "scheme": "http",
     "registered_ip_addr": "10.53.1.10",
     "port": 8000,
     "api_root": "/namf"
   },
   "ngap": {
-    "bind_addr": "10.53.1.10:38412"
+    "bind_addr": "0.0.0.0:38412"
   },
   "database": {
     "uri": "mongodb://mongodb:27017",
