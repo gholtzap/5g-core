@@ -5,7 +5,7 @@ A complete 5G Core Network implementation with the following Network Functions:
 - **AUSF** (Authentication Server Function) <img src="img/rust.png" alt="Rust" width="20" height="20">
 - **UDM** (Unified Data Management) <img src="img/typescript.svg" alt="TypeScript" width="20" height="20">
 - **NSSF** (Network Slice Selection Function) <img src="img/typescript.svg" alt="TypeScript" width="20" height="20">
-- **AMF** (Access and Mobility Management Function) <img src="img/go.svg" alt="Go" width="20" height="20">
+- **AMF** (Access and Mobility Management Function) <img src="img/rust.png" alt="Rust" width="20" height="20">
 - **SMF** (Session Management Function) <img src="img/rust.png" alt="Rust" width="20" height="20">
 - **UPF** (User Plane Function) <img src="img/rust.png" alt="Rust" width="20" height="20">
 
