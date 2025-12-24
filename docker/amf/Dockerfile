@@ -1,23 +1,29 @@
-FROM golang:1.23-alpine AS builder
+FROM rust:1.83-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+RUN apk add --no-cache \
+    musl-dev \
+    lksctp-tools-dev \
+    pkgconfig \
+    openssl-dev
 
-RUN go mod download
+COPY Cargo.toml Cargo.lock build.rs ./
+COPY src ./src
 
-COPY . .
-
-RUN CGO_ENABLED=0 GOOS=linux go build -o amf ./cmd/amf
+RUN cargo build --release
 
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates
+RUN apk add --no-cache \
+    ca-certificates \
+    lksctp-tools \
+    libgcc
 
 WORKDIR /app
 
-COPY --from=builder /app/amf /app/amf
+COPY --from=builder /app/target/release/amf /app/amf
 
 EXPOSE 8000 38412
 
-CMD ["./amf"]
+CMD ["/app/amf"]

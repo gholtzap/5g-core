@@ -1,125 +1,90 @@
 {
-  "info": {
-    "version": "1.0.0",
-    "description": "AMF configuration for 5G Core Test Environment"
-  },
-  "configuration": {
-    "amfName": "AMF",
-    "ngapIpList": [
-      "10.53.1.10"
-    ],
-    "ngapPort": 38412,
-    "sbi": {
-      "scheme": "http",
-      "registerIPv4": "10.53.1.10",
-      "bindingIPv4": "10.53.1.10",
-      "port": 8000
-    },
-    "serviceNameList": [
-      "namf-comm",
-      "namf-evts",
-      "namf-mt",
-      "namf-loc",
-      "namf-oam"
-    ],
-    "servedGuamiList": [
+  "amf": {
+    "amf_name": "AMF",
+    "region_id": "ca",
+    "set_id": "3fe",
+    "pointer": "00",
+    "guami_list": [
       {
-        "plmnId": {
+        "plmn_id": {
           "mcc": "999",
           "mnc": "70"
         },
-        "amfId": "cafe00"
+        "amf_region_id": "ca",
+        "amf_set_id": "3fe",
+        "amf_pointer": "00"
       }
     ],
-    "supportTaiList": [
+    "plmn_support_list": [
       {
-        "plmnId": {
+        "plmn_id": {
           "mcc": "999",
           "mnc": "70"
         },
-        "tac": "000001"
-      }
-    ],
-    "plmnSupportList": [
-      {
-        "plmnId": {
-          "mcc": "999",
-          "mnc": "70"
-        },
-        "sNssaiList": [
+        "s_nssai_list": [
           {
-            "sst": 1
+            "sst": 1,
+            "sd": null
+          }
+        ],
+        "tai_list": [
+          {
+            "plmn_id": {
+              "mcc": "999",
+              "mnc": "70"
+            },
+            "tac": "000001"
           }
         ]
       }
     ],
-    "supportDnnList": [
-      "internet"
-    ],
-    "nrfUri": "http://10.53.1.40:8080",
-    "security": {
-      "integrityOrder": [
-        "NIA2",
-        "NIA1",
-        "NIA0"
-      ],
-      "cipheringOrder": [
-        "NEA2",
-        "NEA1",
-        "NEA0"
-      ]
-    },
-    "networkName": {
-      "full": "5G Test Network",
-      "short": "5GTN"
-    },
-    "t3502Value": 720,
-    "t3512Value": 3600,
-    "non3gppDeregistrationTimerValue": 3240,
-    "t3513": {
-      "enable": true,
-      "expireTime": 6,
-      "maxRetryTimes": 4
-    },
-    "t3517": {
-      "enable": true,
-      "expireTime": 6,
-      "maxRetryTimes": 4
-    },
-    "t3522": {
-      "enable": true,
-      "expireTime": 6,
-      "maxRetryTimes": 4
-    },
-    "t3540": {
-      "enable": true,
-      "expireTime": 10,
-      "maxRetryTimes": 4
-    },
-    "t3550": {
-      "enable": true,
-      "expireTime": 6,
-      "maxRetryTimes": 4
-    },
-    "t3555": {
-      "enable": true,
-      "expireTime": 6,
-      "maxRetryTimes": 4
-    },
-    "t3560": {
-      "enable": true,
-      "expireTime": 6,
-      "maxRetryTimes": 4
-    },
-    "t3565": {
-      "enable": true,
-      "expireTime": 6,
-      "maxRetryTimes": 4
-    },
-    "t3570": {
-      "enable": true,
-      "expireTime": 6,
-      "maxRetryTimes": 4
-    }
+    "relative_capacity": 255
+  },
+  "sbi": {
+    "bind_addr": "10.53.1.10:8000",
+    "scheme": "http",
+    "registered_ip_addr": "10.53.1.10",
+    "port": 8000,
+    "api_root": "/namf"
+  },
+  "ngap": {
+    "bind_addr": "10.53.1.10:38412"
+  },
+  "database": {
+    "uri": "mongodb://mongodb:27017",
+    "database_name": "amf"
+  },
+  "nrf": {
+    "uri": "http://10.53.1.40:8080"
+  },
+  "ausf": {
+    "uri": "http://10.53.1.30:8080"
+  },
+  "udm": {
+    "uri": "http://10.53.1.60:8080"
+  },
+  "security": {
+    "integrity_order": ["NIA2", "NIA1", "NIA0"],
+    "ciphering_order": ["NEA2", "NEA1", "NEA0"]
+  },
+  "timers": {
+    "t3502": 720,
+    "t3510": 15,
+    "t3511": 10,
+    "t3512": 3600,
+    "t3513": 6,
+    "t3516": 30,
+    "t3517": 6,
+    "t3519": 120,
+    "t3520": 15,
+    "t3521": 15,
+    "t3522": 6,
+    "t3525": 10,
+    "t3540": 10,
+    "t3550": 6,
+    "t3555": 6,
+    "t3560": 6,
+    "t3565": 6,
+    "t3570": 6
   }
 }
