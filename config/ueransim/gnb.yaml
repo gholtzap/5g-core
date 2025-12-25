@@ -2,6 +2,7 @@ mcc: '999'
 mnc: '70'
 nci: '0x000000010'
 idLength: 32
+gnbIdBitLength: 24
 tac: 1
 
 linkIp: 10.53.1.100
