@@ -139,7 +139,7 @@ services:
       - ./config/amf:/app/config:ro
     command: ["/app/amf", "--config", "/app/config/amfcfg.json"]
     environment:
-      - RUST_LOG=info
+      - RUST_LOG=debug
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
