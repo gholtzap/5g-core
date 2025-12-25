@@ -14,6 +14,5 @@ amfConfigs:
 
 slices:
   - sst: 1
-    sd: 0x010203
 
 ignoreStreamIds: true
