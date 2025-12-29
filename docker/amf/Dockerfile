@@ -1,24 +1,27 @@
-FROM rust:1.83-alpine AS builder
+FROM rust:1.83-slim AS builder
 
 WORKDIR /app
 
-RUN apk add --no-cache \
-    musl-dev \
-    lksctp-tools-dev \
-    pkgconfig \
-    openssl-dev
+RUN apt-get update && apt-get install -y \
+    libsctp-dev \
+    pkg-config \
+    libssl-dev \
+    clang \
+    libclang-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY Cargo.toml Cargo.lock build.rs ./
 COPY src ./src
+COPY csrc ./csrc
 
 RUN cargo build --release
 
-FROM alpine:latest
+FROM debian:bookworm-slim
 
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     ca-certificates \
-    lksctp-tools \
-    libgcc
+    libsctp1 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
