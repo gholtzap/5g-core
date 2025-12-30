@@ -6,5 +6,8 @@ git commit -m "Update submodules"
 git push origin master
 docker compose build ausf --no-cache
 docker compose build
-node scripts/provision-subscriber.js
+docker compose up -d mongodb
+echo "Waiting for MongoDB to be ready..."
+sleep 15
+MONGODB_URI='mongodb://localhost:27017' node scripts/provision-subscriber.js
 docker compose up
