@@ -6,4 +6,5 @@ git commit -m "Update submodules"
 git push origin master
 docker compose build ausf --no-cache
 docker compose build
+node scripts/provision-subscriber.js
 docker compose up

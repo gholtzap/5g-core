@@ -1,115 +1,119 @@
 #!/usr/bin/env node
 
-/**
- * Subscriber Provisioning Script for 5G Core Test Environment
- *
- * This script provisions a test subscriber in MongoDB Atlas for the UDM.
- * It creates the subscriber with authentication credentials and subscription data.
- */
-
 const { MongoClient } = require('mongodb');
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
-// Subscriber configuration from .env
-const SUBSCRIBER = {
-  imsi: process.env.IMSI || '999700123456789',
-  msisdn: process.env.MSISDN || '1234567890',
-  k: process.env.KEY || '465B5CE8B199B49FAA5F0A2EE238A6BC',
-  opc: process.env.OPC || 'E8ED289DEBA952E4283B54E88E6183CA',
-  amf: process.env.AMF_VALUE || '8000',
-  sqn: '000000000000',
-  plmnId: {
-    mcc: process.env.MCC || '999',
-    mnc: process.env.MNC || '70'
-  },
-  subscribedSnssais: [
-    {
-      sst: 1
-    }
-  ],
-  allowedDnns: ['internet'],
-  ueAmbr: {
-    uplink: '100 Mbps',
-    downlink: '100 Mbps'
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://mongodb:27017';
+const DB_NAME = 'udm';
+const COLLECTION_NAME = 'subscribers';
+
+const subscriber = {
+  supi: 'imsi-999700123456789',
+  permanentKey: '465B5CE8B199B49FAA5F0A2EE238A6BC',
+  operatorKey: 'E8ED289DEBA952E4283B54E88E6183CA',
+  sequenceNumber: '000000000001',
+  authenticationMethod: '5G_AKA',
+  subscribedData: {
+    authenticationSubscription: {
+      authenticationMethod: '5G_AKA',
+      permanentKey: {
+        permanentKeyValue: '465B5CE8B199B49FAA5F0A2EE238A6BC'
+      },
+      sequenceNumber: '000000000001',
+      authenticationManagementField: '8000',
+      milenage: {
+        op: {
+          opValue: 'E8ED289DEBA952E4283B54E88E6183CA'
+        }
+      }
+    },
+    amData: {
+      gpsis: ['msisdn-0123456789'],
+      subscribedUeAmbr: {
+        uplink: '1 Gbps',
+        downlink: '2 Gbps'
+      },
+      nssai: {
+        defaultSingleNssais: [
+          { sst: 1 }
+        ]
+      }
+    },
+    smData: [
+      {
+        singleNssai: { sst: 1 },
+        dnnConfigurations: {
+          internet: {
+            pduSessionTypes: {
+              defaultSessionType: 'IPV4'
+            },
+            sscModes: {
+              defaultSscMode: 'SSC_MODE_1'
+            },
+            '5gQosProfile': {
+              '5qi': 9,
+              arp: {
+                priorityLevel: 8
+              }
+            },
+            sessionAmbr: {
+              uplink: '1 Gbps',
+              downlink: '2 Gbps'
+            }
+          }
+        }
+      }
+    ]
   }
 };
 
-// MongoDB configuration
-const MONGODB_URI = process.env.MONGODB_URI;
-const DB_NAME = process.env.MONGODB_DB_NAME || 'udm';
-const COLLECTION_NAME = process.env.MONGODB_COLLECTION_NAME || 'subscribers';
-
 async function provisionSubscriber() {
-  console.log('=== 5G Core Subscriber Provisioning ===\n');
-
-  if (!MONGODB_URI) {
-    console.error('ERROR: MONGODB_URI not found in environment variables');
-    console.error('Please ensure .env file exists and contains MONGODB_URI');
-    process.exit(1);
-  }
-
-  console.log(`Connecting to MongoDB Atlas...`);
-  console.log(`Database: ${DB_NAME}`);
-  console.log(`Collection: ${COLLECTION_NAME}\n`);
-
   const client = new MongoClient(MONGODB_URI);
 
   try {
-    // Connect to MongoDB
+    console.log(`Connecting to MongoDB at ${MONGODB_URI}...`);
     await client.connect();
-    console.log('✓ Connected to MongoDB Atlas\n');
+    console.log('Connected to MongoDB');
 
     const db = client.db(DB_NAME);
     const collection = db.collection(COLLECTION_NAME);
 
-    // Check if subscriber already exists
-    console.log(`Checking for existing subscriber with IMSI: ${SUBSCRIBER.imsi}...`);
-    const existing = await collection.findOne({ imsi: SUBSCRIBER.imsi });
+    const existingSubscriber = await collection.findOne({ supi: subscriber.supi });
 
-    if (existing) {
-      console.log('⚠ Subscriber already exists!');
-      console.log('\nExisting subscriber data:');
-      console.log(JSON.stringify(existing, null, 2));
-
-      // Ask if we should update
-      console.log('\nDo you want to update this subscriber? (This will replace existing data)');
-      console.log('To update, delete the existing subscriber first and re-run this script.\n');
-      return;
-    }
-
-    // Insert new subscriber
-    console.log('✓ No existing subscriber found. Creating new subscriber...\n');
-    console.log('Subscriber details:');
-    console.log(JSON.stringify(SUBSCRIBER, null, 2));
-    console.log('');
-
-    const result = await collection.insertOne(SUBSCRIBER);
-
-    if (result.acknowledged) {
-      console.log('✓ Subscriber provisioned successfully!');
-      console.log(`  Document ID: ${result.insertedId}`);
-      console.log(`  IMSI: ${SUBSCRIBER.imsi}`);
-      console.log(`  MSISDN: ${SUBSCRIBER.msisdn}`);
-      console.log(`  PLMN: ${SUBSCRIBER.plmnId.mcc}-${SUBSCRIBER.plmnId.mnc}`);
-      console.log(`  Allowed DNNs: ${SUBSCRIBER.allowedDnns.join(', ')}`);
-      console.log(`  Allowed Slices: SST=${SUBSCRIBER.subscribedSnssais[0].sst}`);
-      console.log('\n✓ Provisioning complete! The subscriber is ready for testing.\n');
+    if (existingSubscriber) {
+      console.log(`Subscriber ${subscriber.supi} already exists. Updating...`);
+      const result = await collection.replaceOne(
+        { supi: subscriber.supi },
+        subscriber
+      );
+      console.log(`Updated subscriber ${subscriber.supi}`);
+      console.log(`  - Modified count: ${result.modifiedCount}`);
     } else {
-      console.error('✗ Failed to provision subscriber');
-      process.exit(1);
+      console.log(`Subscriber ${subscriber.supi} does not exist. Inserting...`);
+      const result = await collection.insertOne(subscriber);
+      console.log(`Inserted subscriber ${subscriber.supi}`);
+      console.log(`  - Inserted ID: ${result.insertedId}`);
     }
+
+    console.log('\nSubscriber provisioned successfully!');
+    console.log('\nSubscriber details:');
+    console.log(`  SUPI: ${subscriber.supi}`);
+    console.log(`  IMSI: 999700123456789`);
+    console.log(`  MCC: 999`);
+    console.log(`  MNC: 70`);
+    console.log(`  K (permanentKey): ${subscriber.permanentKey}`);
+    console.log(`  OPc (operatorKey): ${subscriber.operatorKey}`);
+    console.log(`  SQN: ${subscriber.sequenceNumber}`);
+    console.log(`  AMF: 8000`);
+    console.log(`  Authentication Method: ${subscriber.authenticationMethod}`);
+    console.log('\nYou can now test UE attachment with UERANSIM.');
 
   } catch (error) {
-    console.error('✗ Error during provisioning:');
-    console.error(error.message);
-    console.error('\nFull error:');
-    console.error(error);
+    console.error('Error provisioning subscriber:', error);
     process.exit(1);
   } finally {
     await client.close();
-    console.log('Disconnected from MongoDB\n');
+    console.log('\nMongoDB connection closed.');
   }
 }
 
-// Run the provisioning
-provisionSubscriber().catch(console.error);
+provisionSubscriber();
