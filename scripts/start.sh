@@ -12,8 +12,8 @@ git add .
 git commit -m "Update submodules" || echo "No changes to commit"
 git push origin master
 
-echo "Building AUSF (no cache)..."
-docker compose build ausf --no-cache
+echo "Building AMF (no cache)..."
+docker compose build amf --no-cache
 
 echo "Building all services..."
 docker compose build
