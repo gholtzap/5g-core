@@ -14,8 +14,9 @@ RUN apt-get update && \
 
 WORKDIR /ueransim
 
-RUN git clone https://github.com/aligungr/UERANSIM.git . && \
-    make
+COPY UERANSIM/ .
+
+RUN make
 
 ENV PATH="/ueransim/build:${PATH}"
 
