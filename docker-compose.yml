@@ -202,7 +202,9 @@ services:
       - net.ipv4.ip_forward=1
 
   ueransim-gnb:
-    build: ./docker/ueransim
+    build:
+      context: .
+      dockerfile: ./docker/ueransim/Dockerfile
     container_name: ueransim-gnb
     hostname: ueransim-gnb
     depends_on:
@@ -223,7 +225,9 @@ services:
     tty: true
 
   ueransim-ue:
-    build: ./docker/ueransim
+    build:
+      context: .
+      dockerfile: ./docker/ueransim/Dockerfile
     container_name: ueransim-ue
     hostname: ueransim-ue
     depends_on:
