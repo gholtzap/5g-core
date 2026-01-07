@@ -2,10 +2,8 @@
 
 set -e
 
-gum style \
-	--foreground 212 --border-foreground 212 --border double \
-	--align center --width 50 --margin "1 2" --padding "2 4" \
-	'Subscriber Provisioning'
+gum style --foreground 212 --bold "Subscriber Provisioning"
+echo ""
 
 MONGODB_CONTAINER=$(docker ps --format '{{.Names}}' | grep mongodb | head -n 1)
 

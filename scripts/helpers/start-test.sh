@@ -2,10 +2,8 @@
 
 set +e
 
-gum style \
-	--foreground 212 --border-foreground 212 --border double \
-	--align center --width 50 --margin "1 2" --padding "2 4" \
-	'UERANSIM Test Environment'
+gum style --foreground 212 --bold "UERANSIM Test Environment"
+echo ""
 
 if [ -f .env ]; then
     export $(cat .env | grep -v '^#' | xargs)
@@ -33,12 +31,9 @@ gum spin --spinner dot --title "Waiting for UE to attempt registration..." -- sl
 gum style --foreground 42 "✓ UE started"
 echo ""
 
-gum style \
-    --foreground 42 --border-foreground 42 --border double \
-    --align center --width 50 --margin "1 2" --padding "2 4" \
-    'UERANSIM Test Started!'
-
+gum style --foreground 42 --bold "✓ UERANSIM Test Started!"
 echo ""
+
 gum style --foreground 220 --bold "Monitor the attach procedure:"
 echo ""
 
