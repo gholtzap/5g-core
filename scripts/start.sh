@@ -14,9 +14,10 @@ show_menu() {
     echo "  3) Update & Build (update submodules, rebuild changed components)"
     echo "  4) Clean Start (stop all, clean volumes, fresh start)"
     echo "  5) Custom (interactive configuration)"
-    echo "  6) Exit"
+    echo "  6) Update Submodules (update, commit, and push)"
+    echo "  7) Exit"
     echo ""
-    read -p "Choice [1-6]: " choice
+    read -p "Choice [1-7]: " choice
     echo ""
 }
 
@@ -143,6 +144,14 @@ do_custom() {
     start_services
 }
 
+do_update_submodules() {
+    echo "=== Update Submodules Mode ==="
+    echo ""
+
+    update_submodules
+    commit_push
+}
+
 update_submodules() {
     echo "Updating git submodules..."
     git submodule update --remote --merge
@@ -229,7 +238,8 @@ while true; do
         3) do_update_build; break ;;
         4) do_clean_start; break ;;
         5) do_custom; break ;;
-        6) echo "Exiting..."; exit 0 ;;
+        6) do_update_submodules; break ;;
+        7) echo "Exiting..."; exit 0 ;;
         *) echo "Invalid choice. Please try again."; echo "" ;;
     esac
 done
