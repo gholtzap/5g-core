@@ -3,28 +3,54 @@
 set -e
 
 if ! command -v gum &> /dev/null; then
-    echo "Installing gum (required for styled output)..."
+    echo ""
+    echo "This script requires 'gum' for styled terminal output."
+    echo "Learn more: https://github.com/charmbracelet/gum"
+    echo ""
+
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        if command -v brew &> /dev/null; then
-            brew install gum
-        else
+        if ! command -v brew &> /dev/null; then
             echo "Error: Homebrew is not installed. Install it from https://brew.sh/"
             exit 1
         fi
+        echo "Installation command: brew install gum"
     elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        if command -v apt-get &> /dev/null; then
-            sudo mkdir -p /etc/apt/keyrings
-            curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
-            echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
-            sudo apt-get update && sudo apt-get install -y gum
-        else
+        if ! command -v apt-get &> /dev/null; then
             echo "Error: gum is required. Install from https://github.com/charmbracelet/gum"
             exit 1
         fi
+        echo "Installation requires adding Charm repository and running: sudo apt-get install gum"
     else
         echo "Error: gum is required. Install from https://github.com/charmbracelet/gum"
         exit 1
     fi
+
+    echo ""
+    read -p "Install gum now? (y/n): " -n 1 -r
+    echo ""
+
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Setup cancelled. Install gum manually and run this script again."
+        exit 0
+    fi
+
+    echo "Installing gum..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install gum
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
+        sudo apt-get update && sudo apt-get install -y gum
+    fi
+
+    if ! command -v gum &> /dev/null; then
+        echo "Error: gum installation failed"
+        exit 1
+    fi
+
+    echo "✓ gum installed successfully"
+    echo ""
 fi
 
 gum style \
