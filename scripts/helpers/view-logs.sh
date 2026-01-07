@@ -1,10 +1,12 @@
 #!/bin/bash
-# View logs from all 5G Core containers
 
-echo "=== 5G Core Network Logs ==="
+gum style \
+	--foreground 212 --border-foreground 212 --border double \
+	--align center --width 50 --margin "1 2" --padding "2 4" \
+	'5G Core Network Logs'
+
 echo ""
-echo "Press Ctrl+C to stop viewing logs"
+gum style --foreground 244 "Press Ctrl+C to stop viewing logs"
 echo ""
 
-# Follow logs from all containers
-docker-compose logs -f --tail=50
+docker compose logs -f --tail=50

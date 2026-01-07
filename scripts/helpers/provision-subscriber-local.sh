@@ -2,20 +2,20 @@
 
 set -e
 
-echo "========================================="
-echo "Provisioning Subscriber to Docker MongoDB"
-echo "========================================="
-echo ""
+gum style \
+	--foreground 212 --border-foreground 212 --border double \
+	--align center --width 50 --margin "1 2" --padding "2 4" \
+	'Subscriber Provisioning'
 
 MONGODB_CONTAINER=$(docker ps --format '{{.Names}}' | grep mongodb | head -n 1)
 
 if [ -z "$MONGODB_CONTAINER" ]; then
-    echo "Error: MongoDB container not running"
-    echo "Please start MongoDB first: docker compose up -d mongodb"
+    gum style --foreground 196 "✗ MongoDB container not running"
+    gum style --foreground 208 "Please start MongoDB first: docker compose up -d mongodb"
     exit 1
 fi
 
-echo "Found MongoDB container: $MONGODB_CONTAINER"
+gum style --foreground 42 "✓ Found MongoDB container: $MONGODB_CONTAINER"
 echo ""
 
 SUBSCRIBER_DOC='
@@ -80,27 +80,23 @@ SUBSCRIBER_DOC='
 }
 '
 
-echo "Provisioning subscriber to Docker MongoDB..."
-
-docker exec "$MONGODB_CONTAINER" mongosh udm --eval "
+gum spin --spinner dot --title "Provisioning subscriber to Docker MongoDB..." -- \
+    docker exec "$MONGODB_CONTAINER" mongosh udm --quiet --eval "
   const subscriber = $SUBSCRIBER_DOC;
   const existing = db.subscribers.findOne({ supi: subscriber.supi });
   if (existing) {
-    print('Subscriber already exists. Updating...');
     db.subscribers.replaceOne({ supi: subscriber.supi }, subscriber);
-    print('Updated subscriber: ' + subscriber.supi);
   } else {
-    print('Inserting new subscriber...');
     db.subscribers.insertOne(subscriber);
-    print('Inserted subscriber: ' + subscriber.supi);
   }
-  print('');
-  print('Subscriber provisioned successfully!');
-  print('  SUPI: imsi-999700123456789');
-  print('  MCC/MNC: 999/70');
-  print('  K: 465B5CE8B199B49FAA5F0A2EE238A6BC');
-  print('  OPc: E8ED289DEBA952E4283B54E88E6183CA');
 "
 
 echo ""
-echo "Done! Subscriber is now in Docker MongoDB."
+gum style --foreground 42 --bold "✓ Subscriber provisioned successfully!"
+echo ""
+gum style --foreground 244 "Subscriber details:"
+gum style --foreground 255 "  SUPI: imsi-999700123456789"
+gum style --foreground 255 "  MCC/MNC: 999/70"
+gum style --foreground 255 "  K: 465B5CE8B199B49FAA5F0A2EE238A6BC"
+gum style --foreground 255 "  OPc: E8ED289DEBA952E4283B54E88E6183CA"
+echo ""

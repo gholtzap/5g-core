@@ -1,62 +1,64 @@
 #!/bin/bash
-# Start UERANSIM gNB and UE for testing
 
-# Don't exit on error - we want to see what failed
 set +e
 
-echo "=== Starting UERANSIM Test Environment ==="
-echo ""
+gum style \
+	--foreground 212 --border-foreground 212 --border double \
+	--align center --width 50 --margin "1 2" --padding "2 4" \
+	'UERANSIM Test Environment'
 
-# Load environment variables
 if [ -f .env ]; then
     export $(cat .env | grep -v '^#' | xargs)
 fi
 
-echo "Checking if core network is running..."
-if ! docker-compose ps | grep -q "amf.*Up"; then
-    echo "ERROR: AMF is not running!"
-    echo "Please start the core network first with ./scripts/start-core.sh"
+gum spin --spinner dot --title "Checking if core network is running..." -- sleep 1
+
+if ! docker compose ps | grep -q "amf.*Up"; then
+    gum style --foreground 196 "✗ AMF is not running!"
+    gum style --foreground 208 "Please start the core network first with ./scripts/start.sh"
     exit 1
 fi
-echo "✓ Core network is running"
+gum style --foreground 42 "✓ Core network is running"
 echo ""
 
-echo "[1/2] Starting UERANSIM gNB (5G Base Station Simulator)..."
-docker-compose up -d ueransim-gnb
-echo "Waiting for gNB to establish NGAP connection with AMF..."
-sleep 10
-echo "✓ gNB started"
+gum style --foreground 86 --bold "[1/2] Starting UERANSIM gNB..."
+docker compose up -d ueransim-gnb
+gum spin --spinner dot --title "Waiting for gNB to establish NGAP connection with AMF..." -- sleep 10
+gum style --foreground 42 "✓ gNB started"
 echo ""
 
-echo "[2/2] Starting UERANSIM UE (5G User Equipment Simulator)..."
-docker-compose up -d ueransim-ue
-echo "Waiting for UE to attempt registration..."
-sleep 5
-echo "✓ UE started"
+gum style --foreground 86 --bold "[2/2] Starting UERANSIM UE..."
+docker compose up -d ueransim-ue
+gum spin --spinner dot --title "Waiting for UE to attempt registration..." -- sleep 5
+gum style --foreground 42 "✓ UE started"
 echo ""
 
-echo "=== UERANSIM Test Started ==="
+gum style \
+    --foreground 42 --border-foreground 42 --border double \
+    --align center --width 50 --margin "1 2" --padding "2 4" \
+    'UERANSIM Test Started!'
+
 echo ""
-echo "Monitor the attach procedure:"
-echo "  View all logs:"
-echo "    ./scripts/helpers/view-logs.sh"
+gum style --foreground 220 --bold "Monitor the attach procedure:"
 echo ""
-echo "  View specific NF logs:"
-echo "    docker-compose logs -f ueransim-ue"
-echo "    docker-compose logs -f ueransim-gnb"
-echo "    docker-compose logs -f amf"
-echo "    docker-compose logs -f ausf"
-echo "    docker-compose logs -f smf"
+
+gum style --foreground 244 "View all logs:"
+gum style --foreground 86 "  ./scripts/helpers/view-logs.sh"
 echo ""
-echo "Expected test flow:"
-echo "  1. gNB establishes NGAP connection with AMF (N2 interface)"
-echo "  2. UE sends Registration Request via gNB"
-echo "  3. AMF authenticates UE via AUSF"
-echo "  4. AMF completes registration"
-echo "  5. UE requests PDU Session (internet DNN)"
-echo "  6. SMF attempts to contact UPF (will fail - no UPF deployed)"
+
+gum style --foreground 244 "View specific NF logs:"
+gum style --foreground 255 "  docker compose logs -f ueransim-ue"
+gum style --foreground 255 "  docker compose logs -f ueransim-gnb"
+gum style --foreground 255 "  docker compose logs -f amf"
+gum style --foreground 255 "  docker compose logs -f ausf"
+gum style --foreground 255 "  docker compose logs -f smf"
 echo ""
-echo "This failure will show you exactly which UPF endpoints are needed!"
+
+gum style --foreground 220 --bold "Expected test flow:"
+gum style --foreground 255 "  1. gNB establishes NGAP connection with AMF (N2 interface)"
+gum style --foreground 255 "  2. UE sends Registration Request via gNB"
+gum style --foreground 255 "  3. AMF authenticates UE via AUSF"
+gum style --foreground 255 "  4. AMF completes registration"
+gum style --foreground 255 "  5. UE requests PDU Session (internet DNN)"
+gum style --foreground 255 "  6. SMF establishes session with UPF"
 echo ""
-echo "Press Enter to close this window..."
-read
