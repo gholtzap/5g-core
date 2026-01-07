@@ -2,6 +2,31 @@
 
 set -e
 
+if ! command -v gum &> /dev/null; then
+    echo "Installing gum (required for styled output)..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if command -v brew &> /dev/null; then
+            brew install gum
+        else
+            echo "Error: Homebrew is not installed. Install it from https://brew.sh/"
+            exit 1
+        fi
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        if command -v apt-get &> /dev/null; then
+            sudo mkdir -p /etc/apt/keyrings
+            curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+            echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
+            sudo apt-get update && sudo apt-get install -y gum
+        else
+            echo "Error: gum is required. Install from https://github.com/charmbracelet/gum"
+            exit 1
+        fi
+    else
+        echo "Error: gum is required. Install from https://github.com/charmbracelet/gum"
+        exit 1
+    fi
+fi
+
 gum style \
 	--foreground 212 --border-foreground 212 --border double \
 	--align center --width 50 --margin "1 2" --padding "2 4" \
