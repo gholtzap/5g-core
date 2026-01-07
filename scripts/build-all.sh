@@ -43,7 +43,7 @@ echo "✓ SMF built successfully"
 echo ""
 
 echo "[7/7] Building UERANSIM (gNB + UE Simulator)..."
-docker build -t 5g-core-ueransim:latest ./docker/ueransim
+docker build -t 5g-core-ueransim:latest -f ./docker/ueransim/Dockerfile .
 echo "✓ UERANSIM built successfully"
 echo ""
 

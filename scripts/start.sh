@@ -25,7 +25,7 @@ echo "Waiting for MongoDB to be ready..."
 sleep 15
 
 echo "Provisioning subscriber..."
-./scripts/provision-subscriber-local.sh
+./provision-subscriber-local.sh
 
 echo "Starting all services..."
 docker compose up

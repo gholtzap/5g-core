@@ -64,7 +64,7 @@ fi
 echo "✓ All required prerequisites are met"
 echo ""
 
-echo "[2/5] Initializing git submodules..."
+echo "[2/6] Initializing git submodules..."
 echo ""
 
 if git submodule status | grep -q '^-'; then
@@ -79,7 +79,20 @@ echo ""
 echo "✓ Submodules ready"
 echo ""
 
-echo "[3/5] Configuring environment..."
+echo "[3/6] Setting up UERANSIM (validation tool)..."
+echo ""
+
+if [ ! -d "UERANSIM" ]; then
+    echo "UERANSIM not found. Cloning from GitHub..."
+    git clone https://github.com/aligungr/UERANSIM.git
+    echo "✓ UERANSIM cloned"
+else
+    echo "✓ UERANSIM already exists"
+fi
+
+echo ""
+
+echo "[4/6] Configuring environment..."
 echo ""
 
 if [ -f .env ]; then
@@ -135,7 +148,7 @@ echo ""
 echo "✓ Environment configured"
 echo ""
 
-echo "[4/5] Building Docker images..."
+echo "[5/6] Building Docker images..."
 echo ""
 echo "This will take 10-20 minutes depending on your system."
 echo "Rust and C++ components need to compile from source."
@@ -156,7 +169,7 @@ fi
 
 echo ""
 
-echo "[5/5] Setup complete!"
+echo "[6/6] Setup complete!"
 echo ""
 echo "=========================================="
 echo "  Next Steps"
