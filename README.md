@@ -20,5 +20,12 @@ cd 5g-core
 ```bash
 ./scripts/setup.sh
 ```
+*this script installs everything needed.*
 
-For manual installation, follow the steps at [docs/installation.md](docs/installation.md) 
+3. run the following:
+```bash
+./scripts/start.sh
+```
+*this script starts everything*.
+
+There's more detailed information on installaton located @  [docs/installation.md](docs/installation.md) 
