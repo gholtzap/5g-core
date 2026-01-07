@@ -112,7 +112,7 @@ npm install mongodb dotenv
 Run the provisioning script:
 
 ```bash
-node scripts/provision-subscriber.js
+./scripts/helpers/provision-subscriber-local.sh
 ```
 
 This script will:

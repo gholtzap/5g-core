@@ -189,8 +189,8 @@ start_services() {
     fi
 
     if [[ $provision == "Yes" ]]; then
-        if [ -f ./scripts/provision-subscriber-local.sh ]; then
-            ./scripts/provision-subscriber-local.sh
+        if [ -f ./scripts/helpers/provision-subscriber-local.sh ]; then
+            ./scripts/helpers/provision-subscriber-local.sh
         else
             gum style --foreground 208 "⚠ provision-subscriber-local.sh not found, skipping..."
         fi
@@ -212,10 +212,10 @@ start_services() {
 
         gum style --foreground 244 "Useful commands:"
         gum style --foreground 255 "  View logs: docker compose logs -f [service-name]"
-        gum style --foreground 255 "  View all logs: ./scripts/view-logs.sh"
+        gum style --foreground 255 "  View all logs: ./scripts/helpers/view-logs.sh"
         gum style --foreground 255 "  Check status: docker compose ps"
         gum style --foreground 255 "  Stop services: docker compose down"
-        gum style --foreground 255 "  Start test: ./scripts/start-test.sh"
+        gum style --foreground 255 "  Start test: ./scripts/helpers/start-test.sh"
     fi
 }
 
