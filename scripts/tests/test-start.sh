@@ -108,7 +108,7 @@ echo "[7/7] Checking for critical errors in logs..."
 CRITICAL_ERRORS=0
 
 for service in mongodb nrf ausf udm nssf amf smf upf ueransim-gnb ueransim-ue; do
-    if docker compose logs --tail=100 $service 2>/dev/null | grep -iE "panic|fatal|critical" | grep -v "panic="; then
+    if docker compose logs --tail=100 $service 2>/dev/null | grep -iE "panic|fatal|critical" | grep -viE "panic=|criticality"; then
         echo "✗ Critical errors found in $service"
         CRITICAL_ERRORS=$((CRITICAL_ERRORS + 1))
     fi
