@@ -1,4 +1,6 @@
-# 5G Core Network Implementation
+# 5G Mobile Core Implementation
+
+<img width="405" height="711" alt="Screenshot 2026-01-07 at 9 40 51 AM" src="https://github.com/user-attachments/assets/2d5e42e1-c1f2-4c5e-9efc-e39b0daa48a5" />
 
 A complete 5G Core Network implementation with the following Network Functions:
 - **NRF** (Network Repository Function) <img src="img/typescript.svg" alt="TypeScript" width="20" height="20">
@@ -27,5 +29,6 @@ cd 5g-core
 ./scripts/start.sh
 ```
 *this script starts everything*.
+
 
 There's more detailed information on installaton located @  [docs/installation.md](docs/installation.md) 
