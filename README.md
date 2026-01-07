@@ -2,7 +2,7 @@
 
 <img width="405" height="711" alt="Screenshot 2026-01-07 at 9 40 51 AM" src="https://github.com/user-attachments/assets/2d5e42e1-c1f2-4c5e-9efc-e39b0daa48a5" />
 
-A complete 5G Core Network implementation with the following Network Functions:
+A complete 5G Mobile Core implementation, designed for 5G SA, with the following Network Functions:
 - **NRF** (Network Repository Function) <img src="img/typescript.svg" alt="TypeScript" width="20" height="20">
 - **AUSF** (Authentication Server Function) <img src="img/rust.png" alt="Rust" width="20" height="20">
 - **UDM** (Unified Data Management) <img src="img/typescript.svg" alt="TypeScript" width="20" height="20">
