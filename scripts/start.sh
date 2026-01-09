@@ -45,13 +45,15 @@ do_update_build() {
     commit_push
 
     if gum confirm "Rebuild AMF with --no-cache?"; then
-        gum spin --spinner dot --title "Building AMF (no cache)..." -- \
-            docker compose build amf --no-cache
+        gum style --foreground 220 "Building AMF (no cache)..."
+        docker compose build amf --no-cache
+        gum style --foreground 42 "✓ AMF build complete"
         echo ""
     fi
 
-    gum spin --spinner dot --title "Building all services..." -- \
-        docker compose build
+    gum style --foreground 220 "Building all services..."
+    docker compose build
+    gum style --foreground 42 "✓ Build complete"
     echo ""
 
     check_mongodb
@@ -62,8 +64,8 @@ do_clean_start() {
     gum style --foreground 86 --bold "Clean Start Mode"
     echo ""
 
-    gum spin --spinner dot --title "Stopping and removing containers/volumes..." -- \
-        docker compose down -v
+    gum style --foreground 220 "Stopping and removing containers/volumes..."
+    docker compose down -v
     gum style --foreground 42 "✓ Containers and volumes removed"
     echo ""
 
@@ -73,12 +75,13 @@ do_clean_start() {
     fi
 
     if gum confirm "Rebuild with --no-cache?"; then
-        gum spin --spinner dot --title "Building all services with --no-cache..." -- \
-            docker compose build --no-cache
+        gum style --foreground 220 "Building all services with --no-cache..."
+        docker compose build --no-cache
     else
-        gum spin --spinner dot --title "Building all services..." -- \
-            docker compose build
+        gum style --foreground 220 "Building all services..."
+        docker compose build
     fi
+    gum style --foreground 42 "✓ Build complete"
     echo ""
 
     check_mongodb
@@ -99,8 +102,10 @@ do_custom() {
 
     if gum confirm "Stop existing containers?"; then
         if gum confirm "Clean volumes too?"; then
+            gum style --foreground 220 "Stopping containers and removing volumes..."
             docker compose down -v
         else
+            gum style --foreground 220 "Stopping containers..."
             docker compose down
         fi
         gum style --foreground 42 "✓ Containers stopped"
@@ -109,19 +114,21 @@ do_custom() {
 
     if gum confirm "Rebuild Docker images?"; then
         if gum confirm "Rebuild AMF with --no-cache?"; then
-            gum spin --spinner dot --title "Building AMF (no cache)..." -- \
-                docker compose build amf --no-cache
+            gum style --foreground 220 "Building AMF (no cache)..."
+            docker compose build amf --no-cache
+            gum style --foreground 42 "✓ AMF build complete"
             echo ""
         fi
 
         if gum confirm "Rebuild other services?"; then
             if gum confirm "Use --no-cache for all?"; then
-                gum spin --spinner dot --title "Building all services with --no-cache..." -- \
-                    docker compose build --no-cache
+                gum style --foreground 220 "Building all services with --no-cache..."
+                docker compose build --no-cache
             else
-                gum spin --spinner dot --title "Building all services..." -- \
-                    docker compose build
+                gum style --foreground 220 "Building all services..."
+                docker compose build
             fi
+            gum style --foreground 42 "✓ Build complete"
             echo ""
         fi
     fi
@@ -139,8 +146,8 @@ do_update_submodules() {
 }
 
 update_submodules() {
-    gum spin --spinner dot --title "Updating git submodules..." -- \
-        git submodule update --remote --merge
+    gum style --foreground 220 "Updating git submodules..."
+    git submodule update --remote --merge
     gum style --foreground 42 "✓ Submodules updated"
     echo ""
 }
@@ -161,8 +168,8 @@ commit_push() {
 }
 
 rebuild_all_no_cache() {
-    gum spin --spinner dot --title "Rebuilding all services with --no-cache..." -- \
-        docker compose build --no-cache
+    gum style --foreground 220 "Rebuilding all services with --no-cache..."
+    docker compose build --no-cache
     gum style --foreground 42 "✓ All services rebuilt"
     echo ""
 }
@@ -172,11 +179,10 @@ check_mongodb() {
         gum style --foreground 42 "✓ MongoDB already running"
         echo ""
     else
-        gum spin --spinner dot --title "Starting MongoDB..." -- \
-            docker compose up -d mongodb
-
-        gum spin --spinner dot --title "Waiting for MongoDB to be ready..." -- \
-            sleep 15
+        gum style --foreground 220 "Starting MongoDB..."
+        docker compose up -d mongodb
+        gum style --foreground 220 "Waiting for MongoDB to be ready..."
+        sleep 15
         gum style --foreground 42 "✓ MongoDB ready"
         echo ""
     fi

@@ -119,8 +119,8 @@ gum style --foreground 86 --bold "[2/6] Initializing git submodules..."
 echo ""
 
 if git submodule status | grep -q '^-'; then
-    gum spin --spinner dot --title "Initializing submodules..." -- \
-        git submodule update --init --recursive
+    gum style --foreground 220 "Initializing submodules..."
+    git submodule update --init --recursive
     gum style --foreground 42 "✓ Submodules initialized"
 else
     gum style --foreground 42 "✓ Submodules already initialized"
@@ -133,8 +133,8 @@ gum style --foreground 86 --bold "[3/6] Setting up UERANSIM..."
 echo ""
 
 if [ ! -d "UERANSIM" ]; then
-    gum spin --spinner dot --title "Cloning UERANSIM from GitHub..." -- \
-        git clone https://github.com/aligungr/UERANSIM.git
+    gum style --foreground 220 "Cloning UERANSIM from GitHub..."
+    git clone https://github.com/aligungr/UERANSIM.git
     gum style --foreground 42 "✓ UERANSIM cloned"
 else
     gum style --foreground 42 "✓ UERANSIM already exists"
@@ -204,8 +204,8 @@ echo ""
 
 if gum confirm "Start Docker build now?" --default=true; then
     echo ""
-    gum spin --spinner dot --title "Building all services with docker compose..." -- \
-        docker compose build
+    gum style --foreground 220 "Building all services with docker compose..."
+    docker compose build
     echo ""
     gum style --foreground 42 "✓ All Docker images built successfully"
 else
