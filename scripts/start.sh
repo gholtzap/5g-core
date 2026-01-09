@@ -44,14 +44,21 @@ do_update_build() {
     update_submodules
     commit_push
 
-    if gum confirm "Rebuild AMF with --no-cache?"; then
-        gum style --foreground 220 "Building AMF (no cache)..."
-        docker compose build amf --no-cache
-        gum style --foreground 42 "✓ AMF build complete"
+    changed_services=($(detect_changed_submodules))
+
+    if [ ${#changed_services[@]} -gt 0 ]; then
+        gum style --foreground 220 "Building updated services with --no-cache: ${changed_services[*]}"
+        for service in "${changed_services[@]}"; do
+            docker compose build --no-cache "$service"
+        done
+        gum style --foreground 42 "✓ Updated services rebuilt"
+        echo ""
+    else
+        gum style --foreground 244 "No submodule changes detected"
         echo ""
     fi
 
-    gum style --foreground 220 "Building all services..."
+    gum style --foreground 220 "Building remaining services..."
     docker compose build
     gum style --foreground 42 "✓ Build complete"
     echo ""
@@ -147,9 +154,32 @@ do_update_submodules() {
 
 update_submodules() {
     gum style --foreground 220 "Updating git submodules..."
+    git submodule status > /tmp/submodules_before.txt
     git submodule update --remote --merge
+    git submodule status > /tmp/submodules_after.txt
     gum style --foreground 42 "✓ Submodules updated"
     echo ""
+}
+
+detect_changed_submodules() {
+    local changed_services=()
+
+    if [ -f /tmp/submodules_before.txt ] && [ -f /tmp/submodules_after.txt ]; then
+        while IFS= read -r line; do
+            submodule=$(echo "$line" | awk '{print $2}')
+            case "$submodule" in
+                amf-rust) changed_services+=("amf") ;;
+                ausf) changed_services+=("ausf") ;;
+                nrf) changed_services+=("nrf") ;;
+                nssf) changed_services+=("nssf") ;;
+                udm) changed_services+=("udm") ;;
+                smf) changed_services+=("smf") ;;
+                upf) changed_services+=("upf") ;;
+            esac
+        done < <(diff /tmp/submodules_before.txt /tmp/submodules_after.txt | grep '^>' | awk '{print $2}')
+    fi
+
+    echo "${changed_services[@]}"
 }
 
 commit_push() {
