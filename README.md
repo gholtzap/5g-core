@@ -2,7 +2,7 @@
 
 You likely use 5G networks every day with your phone. To make one, there are two parts: the Mobile Core (Software) and the Cell Towers (Hardware). This repo implements the software portion of a 5G network.
 
-Thus, in order to use this code, you must hook it up to a cell tower. If you don't feel like spending five figures on a radio, I recommend using [UERANSIM](https://github.com/aligungr/UERANSIM). It's what I used to develop this project.
+Thus, in order to use this code, you must hook it up to a cell tower. If you don't feel like spending five figures on a radio, I recommend using [UERANSIM](https://github.com/aligungr/UERANSIM). It's what I used while developing this project.
 
 Your cell phone talks to a cell tower, which talks to the mobile core.
 
