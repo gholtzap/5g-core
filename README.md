@@ -1,3 +1,5 @@
+To learn why & how I made this project, check out my blog post: https://gholtz.app/writing/how-i-built-a-5g-core 
+
 # 5G Mobile Core Implementation
 
 You likely use 5G networks every day with your phone. To make one, there are two parts: the Mobile Core (Software) and the Cell Towers (Hardware). This repo implements the software portion of a 5G network.
