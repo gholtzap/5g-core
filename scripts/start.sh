@@ -120,13 +120,6 @@ do_custom() {
     fi
 
     if gum confirm "Rebuild Docker images?"; then
-        if gum confirm "Rebuild AMF with --no-cache?"; then
-            gum style --foreground 220 "Building AMF (no cache)..."
-            docker compose build amf --no-cache
-            gum style --foreground 42 "✓ AMF build complete"
-            echo ""
-        fi
-
         if gum confirm "Rebuild other services?"; then
             if gum confirm "Use --no-cache for all?"; then
                 gum style --foreground 220 "Building all services with --no-cache..."
@@ -212,9 +205,22 @@ check_mongodb() {
         gum style --foreground 220 "Starting MongoDB..."
         docker compose up -d mongodb
         gum style --foreground 220 "Waiting for MongoDB to be ready..."
-        sleep 15
-        gum style --foreground 42 "✓ MongoDB ready"
+
+        max_attempts=30
+        attempt=0
+        while [ $attempt -lt $max_attempts ]; do
+            if docker compose exec -T mongodb mongosh --quiet --eval "db.adminCommand('ping').ok" 2>/dev/null | grep -q "1"; then
+                gum style --foreground 42 "✓ MongoDB ready"
+                echo ""
+                return 0
+            fi
+            attempt=$((attempt + 1))
+            sleep 1
+        done
+
+        gum style --foreground 196 "✗ MongoDB failed to become ready after ${max_attempts}s"
         echo ""
+        return 1
     fi
 }
 
