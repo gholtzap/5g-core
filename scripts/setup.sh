@@ -68,7 +68,7 @@ check_command() {
     fi
 }
 
-gum style --foreground 86 --bold "[1/6] Checking prerequisites..."
+gum style --foreground 86 --bold "[1/7] Checking prerequisites..."
 echo ""
 
 prerequisites_met=true
@@ -115,7 +115,7 @@ fi
 gum style --foreground 42 "✓ All required prerequisites are met"
 echo ""
 
-gum style --foreground 86 --bold "[2/6] Initializing git submodules..."
+gum style --foreground 86 --bold "[2/7] Initializing git submodules..."
 echo ""
 
 if git submodule status | grep -q '^-'; then
@@ -129,7 +129,7 @@ fi
 
 echo ""
 
-gum style --foreground 86 --bold "[3/6] Setting up UERANSIM..."
+gum style --foreground 86 --bold "[3/7] Setting up UERANSIM..."
 echo ""
 
 if [ ! -d "UERANSIM" ]; then
@@ -142,7 +142,7 @@ fi
 
 echo ""
 
-gum style --foreground 86 --bold "[4/6] Configuring environment..."
+gum style --foreground 86 --bold "[4/7] Configuring environment..."
 echo ""
 
 if [ -f .env ]; then
@@ -196,7 +196,52 @@ echo ""
 gum style --foreground 42 "✓ Environment configured"
 echo ""
 
-gum style --foreground 86 --bold "[5/6] Building Docker images..."
+gum style --foreground 86 --bold "[5/7] Setting up web dashboard..."
+echo ""
+
+if gum confirm "Do you want to set up the web dashboard?"; then
+    echo ""
+
+    if ! command -v node &> /dev/null; then
+        gum style --foreground 196 "✗ Node.js is required for the web dashboard"
+        gum style --foreground 208 "  Install from: https://nodejs.org/ (LTS version 18+)"
+        gum style --foreground 244 "  Skipping web dashboard setup"
+    elif ! command -v npm &> /dev/null; then
+        gum style --foreground 196 "✗ npm is required for the web dashboard"
+        gum style --foreground 244 "  Skipping web dashboard setup"
+    else
+        node_version=$(node --version | sed 's/v//' | cut -d. -f1)
+        if [ "$node_version" -lt 18 ]; then
+            gum style --foreground 208 "⚠ Warning: Node.js 18+ is recommended (current: v$node_version)"
+            if ! gum confirm "Continue anyway?"; then
+                gum style --foreground 244 "Skipping web dashboard setup"
+                echo ""
+            else
+                gum style --foreground 220 "Installing web dashboard dependencies..."
+                cd web-ui
+                npm install
+                cd ..
+                echo ""
+                gum style --foreground 42 "✓ Web dashboard dependencies installed"
+            fi
+        else
+            gum style --foreground 220 "Installing web dashboard dependencies..."
+            cd web-ui
+            npm install
+            cd ..
+            echo ""
+            gum style --foreground 42 "✓ Web dashboard dependencies installed"
+            gum style --foreground 244 "  Access at: http://localhost:3001 (after starting services)"
+        fi
+    fi
+else
+    gum style --foreground 244 "Skipping web dashboard setup"
+    gum style --foreground 244 "You can install dependencies later with: cd web-ui && npm install"
+fi
+
+echo ""
+
+gum style --foreground 86 --bold "[6/7] Building Docker images..."
 echo ""
 gum style --foreground 244 "This will take 10-20 minutes depending on your system."
 gum style --foreground 244 "Rust and C++ components need to compile from source."
@@ -214,7 +259,7 @@ fi
 
 echo ""
 
-gum style --foreground 86 --bold "[6/6] Setup complete!"
+gum style --foreground 86 --bold "[7/7] Setup complete!"
 echo ""
 
 gum style \
@@ -228,4 +273,7 @@ echo ""
 
 gum style --foreground 255 "Run the interactive test script to start the 5G Core:"
 gum style --foreground 86 "  ./scripts/start.sh"
+echo ""
+gum style --foreground 244 "The start script will ask if you want to start the web dashboard."
+gum style --foreground 244 "If enabled, access it at: http://localhost:3001"
 echo ""

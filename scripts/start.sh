@@ -233,18 +233,37 @@ start_services() {
         echo ""
     fi
 
+    start_webui="Yes"
+    if ! gum confirm "Start web dashboard?" --default=true; then
+        start_webui="No"
+    fi
+
     gum style --foreground 220 "Starting all services..."
     echo ""
 
     run_mode=$(gum choose --header "Run mode:" "Background" "Foreground (show logs)")
 
     if [[ $run_mode == "Foreground (show logs)" ]]; then
-        docker compose up
+        if [[ $start_webui == "No" ]]; then
+            docker compose up --scale web-ui=0
+        else
+            docker compose up
+        fi
     else
-        docker compose up -d
+        if [[ $start_webui == "No" ]]; then
+            docker compose up -d --scale web-ui=0
+        else
+            docker compose up -d
+        fi
 
         gum style --foreground 42 --bold "✓ All services started in background"
         echo ""
+
+        if [[ $start_webui == "Yes" ]]; then
+            gum style --foreground 86 --bold "Web Dashboard:"
+            gum style --foreground 255 "  http://localhost:3001"
+            echo ""
+        fi
 
         gum style --foreground 244 "Useful commands:"
         gum style --foreground 255 "  View logs: docker compose logs -f [service-name]"

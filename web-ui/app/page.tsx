@@ -1,23 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import DashboardLayout from "@/components/DashboardLayout";
+import Card from "@/components/Card";
+import StatusBadge from "@/components/StatusBadge";
+import { CheckCircle, XCircle, Circle } from "@phosphor-icons/react";
 
 interface NFStatus {
   name: string;
   url: string;
   status: "online" | "offline" | "checking";
   port: number;
+  description: string;
 }
 
 export default function Home() {
   const [nfStatuses, setNfStatuses] = useState<NFStatus[]>([
-    { name: "NRF", url: "http://localhost:8082", status: "checking", port: 8082 },
-    { name: "AUSF", url: "http://localhost:8081", status: "checking", port: 8081 },
-    { name: "UDM", url: "http://localhost:8084", status: "checking", port: 8084 },
-    { name: "NSSF", url: "http://localhost:8083", status: "checking", port: 8083 },
-    { name: "AMF", url: "http://localhost:8086", status: "checking", port: 8086 },
-    { name: "SMF", url: "http://localhost:8085", status: "checking", port: 8085 },
-    { name: "UPF", url: "http://localhost:8087", status: "checking", port: 8087 },
+    { name: "NRF", url: "http://nrf:8080", status: "checking", port: 8082, description: "Network Repository Function" },
+    { name: "AUSF", url: "http://ausf:8080", status: "checking", port: 8081, description: "Authentication Server Function" },
+    { name: "UDM", url: "http://udm:8080", status: "checking", port: 8084, description: "Unified Data Management" },
+    { name: "NSSF", url: "http://nssf:8080", status: "checking", port: 8083, description: "Network Slice Selection Function" },
+    { name: "AMF", url: "http://amf:8000", status: "checking", port: 8086, description: "Access and Mobility Function" },
+    { name: "SMF", url: "http://smf:8080", status: "checking", port: 8085, description: "Session Management Function" },
+    { name: "UPF", url: "http://upf:8080", status: "checking", port: 8087, description: "User Plane Function" },
   ]);
 
   useEffect(() => {
@@ -41,92 +46,176 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">5G Core Network</h1>
-        </div>
-      </header>
+  const onlineCount = nfStatuses.filter(nf => nf.status === "online").length;
+  const offlineCount = nfStatuses.filter(nf => nf.status === "offline").length;
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Network Functions Status</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {nfStatuses.map((nf) => (
-                <div
-                  key={nf.name}
-                  className="bg-white overflow-hidden shadow rounded-lg border-2 border-gray-200"
-                >
-                  <div className="px-4 py-5 sm:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">{nf.name}</h3>
-                        <p className="text-sm text-gray-500">Port: {nf.port}</p>
-                      </div>
-                      <div className="flex-shrink-0">
-                        {nf.status === "online" && (
-                          <div className="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center">
-                            <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                        )}
-                        {nf.status === "offline" && (
-                          <div className="h-8 w-8 bg-red-500 rounded-full flex items-center justify-center">
-                            <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                        )}
-                        {nf.status === "checking" && (
-                          <div className="h-8 w-8 bg-gray-400 rounded-full animate-pulse"></div>
-                        )}
-                      </div>
+  return (
+    <DashboardLayout activePage="dashboard">
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-2xl)" }}>
+        <div>
+          <h1 style={{ fontSize: "24px", fontWeight: 600, marginBottom: "var(--spacing-xs)" }}>
+            Dashboard
+          </h1>
+          <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+            Real-time network status and monitoring
+          </p>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--spacing-lg)" }}>
+          <Card>
+            <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "var(--spacing-sm)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500 }}>
+              Total Functions
+            </div>
+            <div style={{ fontSize: "32px", fontWeight: 600, color: "var(--text-primary)" }} className="mono">
+              {nfStatuses.length}
+            </div>
+            <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "var(--spacing-xs)" }}>
+              Network Functions
+            </div>
+          </Card>
+
+          <Card>
+            <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "var(--spacing-sm)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500 }}>
+              Online
+            </div>
+            <div style={{ fontSize: "32px", fontWeight: 600, color: "var(--status-success)" }} className="mono">
+              {onlineCount}
+            </div>
+            <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "var(--spacing-xs)" }}>
+              Functions Operational
+            </div>
+          </Card>
+
+          <Card>
+            <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "var(--spacing-sm)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500 }}>
+              Offline
+            </div>
+            <div style={{ fontSize: "32px", fontWeight: 600, color: offlineCount > 0 ? "var(--status-error)" : "var(--text-muted)" }} className="mono">
+              {offlineCount}
+            </div>
+            <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "var(--spacing-xs)" }}>
+              Functions Down
+            </div>
+          </Card>
+        </div>
+
+        <div>
+          <h2 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "var(--spacing-lg)" }}>
+            Network Functions
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "var(--spacing-lg)" }}>
+            {nfStatuses.map((nf) => (
+              <Card key={nf.name}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--spacing-md)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-md)" }}>
+                    <div style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "var(--radius-lg)",
+                      backgroundColor: "var(--bg-tertiary)",
+                      border: "1px solid var(--border)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}>
+                      {nf.status === "online" && <CheckCircle size={20} weight="duotone" color="var(--status-success)" />}
+                      {nf.status === "offline" && <XCircle size={20} weight="duotone" color="var(--status-error)" />}
+                      {nf.status === "checking" && <Circle size={20} weight="duotone" color="var(--status-neutral)" />}
                     </div>
-                    <div className="mt-2">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        nf.status === "online" ? "bg-green-100 text-green-800" :
-                        nf.status === "offline" ? "bg-red-100 text-red-800" :
-                        "bg-gray-100 text-gray-800"
-                      }`}>
-                        {nf.status}
-                      </span>
+                    <div>
+                      <h3 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "2px" }}>
+                        {nf.name}
+                      </h3>
+                      <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                        {nf.description}
+                      </p>
+                    </div>
+                  </div>
+                  <StatusBadge status={nf.status} />
+                </div>
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "var(--spacing-md)",
+                  paddingTop: "var(--spacing-md)",
+                  borderTop: "1px solid var(--border-subtle)",
+                }}>
+                  <div>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+                      Port
+                    </div>
+                    <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
+                      {nf.port}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+                      Endpoint
+                    </div>
+                    <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      localhost
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div className="px-4 py-5 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Network Information</h3>
-            </div>
-            <div className="border-t border-gray-200">
-              <dl>
-                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500">MCC</dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">999</dd>
-                </div>
-                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500">MNC</dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">70</dd>
-                </div>
-                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500">PLMN</dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">99970</dd>
-                </div>
-                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500">TAC</dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">000001</dd>
-                </div>
-              </dl>
-            </div>
+              </Card>
+            ))}
           </div>
         </div>
-      </main>
-    </div>
+
+        <div>
+          <h2 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "var(--spacing-lg)" }}>
+            Network Configuration
+          </h2>
+          <Card>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "var(--spacing-xl)" }}>
+              <div>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "var(--spacing-sm)" }}>
+                  MCC
+                </div>
+                <div className="mono" style={{ fontSize: "18px", fontWeight: 600, color: "var(--text-primary)" }}>
+                  999
+                </div>
+                <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "var(--spacing-xs)" }}>
+                  Mobile Country Code
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "var(--spacing-sm)" }}>
+                  MNC
+                </div>
+                <div className="mono" style={{ fontSize: "18px", fontWeight: 600, color: "var(--text-primary)" }}>
+                  70
+                </div>
+                <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "var(--spacing-xs)" }}>
+                  Mobile Network Code
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "var(--spacing-sm)" }}>
+                  PLMN
+                </div>
+                <div className="mono" style={{ fontSize: "18px", fontWeight: 600, color: "var(--text-primary)" }}>
+                  99970
+                </div>
+                <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "var(--spacing-xs)" }}>
+                  Public Land Mobile Network
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "var(--spacing-sm)" }}>
+                  TAC
+                </div>
+                <div className="mono" style={{ fontSize: "18px", fontWeight: 600, color: "var(--text-primary)" }}>
+                  000001
+                </div>
+                <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "var(--spacing-xs)" }}>
+                  Tracking Area Code
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }

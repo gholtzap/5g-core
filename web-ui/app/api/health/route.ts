@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     clearTimeout(timeoutId);
 
     return NextResponse.json({
-      status: response.ok ? "online" : "offline",
+      status: (response.status >= 200 && response.status < 500) ? "online" : "offline",
     });
   } catch (error) {
     return NextResponse.json({ status: "offline" });

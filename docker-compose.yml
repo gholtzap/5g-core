@@ -255,7 +255,7 @@ services:
       5g-core-net:
         ipv4_address: 10.53.1.200
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - NODE_ENV=production
     restart: unless-stopped
