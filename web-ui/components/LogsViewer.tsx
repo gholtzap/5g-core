@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MagnifyingGlass, ArrowDown, Trash } from "@phosphor-icons/react";
+import { MagnifyingGlass, Trash } from "@phosphor-icons/react";
 import type { LogEntry, LogLevel } from "@/types/logs";
 
 interface LogsViewerProps {
@@ -12,18 +12,18 @@ export default function LogsViewer({ container }: LogsViewerProps) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [logLevel, setLogLevel] = useState<LogLevel>("all");
-  const [autoScroll, setAutoScroll] = useState(true);
-  const logsEndRef = useRef<HTMLDivElement>(null);
   const logsContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!container) return;
 
+    setLogs([]);
+
     const eventSource = new EventSource(`/api/logs?container=${container}`);
 
     eventSource.onmessage = (event) => {
       const logEntry: LogEntry = JSON.parse(event.data);
-      setLogs((prevLogs) => [...prevLogs.slice(-500), logEntry]);
+      setLogs((prevLogs) => [logEntry, ...prevLogs.slice(0, 499)]);
     };
 
     eventSource.onerror = () => {
@@ -35,12 +35,6 @@ export default function LogsViewer({ container }: LogsViewerProps) {
       eventSource.close();
     };
   }, [container]);
-
-  useEffect(() => {
-    if (autoScroll && logsEndRef.current) {
-      logsEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [logs, autoScroll]);
 
   const detectLogLevel = (message: string): string => {
     const lowerMessage = message.toLowerCase();
@@ -126,25 +120,6 @@ export default function LogsViewer({ container }: LogsViewerProps) {
         </select>
 
         <button
-          onClick={() => setAutoScroll(!autoScroll)}
-          style={{
-            padding: "var(--spacing-sm) var(--spacing-md)",
-            fontSize: "13px",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-md)",
-            backgroundColor: autoScroll ? "var(--accent-blue)" : "var(--bg-primary)",
-            color: autoScroll ? "white" : "var(--text-primary)",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "var(--spacing-sm)",
-          }}
-        >
-          <ArrowDown size={16} />
-          Auto-scroll
-        </button>
-
-        <button
           onClick={clearLogs}
           style={{
             padding: "var(--spacing-sm) var(--spacing-md)",
@@ -199,7 +174,6 @@ export default function LogsViewer({ container }: LogsViewerProps) {
             </div>
           ))
         )}
-        <div ref={logsEndRef} />
       </div>
 
       <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
