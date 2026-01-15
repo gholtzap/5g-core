@@ -251,6 +251,9 @@ services:
       dockerfile: ../docker/web-ui/Dockerfile
     container_name: web-ui
     hostname: web-ui
+    depends_on:
+      mongodb:
+        condition: service_healthy
     networks:
       5g-core-net:
         ipv4_address: 10.53.1.200
@@ -258,6 +261,8 @@ services:
       - "3001:3000"
     environment:
       - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DB_NAME=udm
     restart: unless-stopped
 
 volumes:
