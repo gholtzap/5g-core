@@ -10,7 +10,7 @@ const CONTAINERS = ['amf', 'ausf', 'udm', 'smf', 'upf', 'nrf', 'nssf'];
 async function fetchContainerLogs(
   containerName: string,
   since?: number,
-  tail: number = 500
+  tail: number = 2000
 ): Promise<string[]> {
   try {
     const container = docker.getContainer(containerName);
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
   const tailParam = searchParams.get('tail');
 
   const since = sinceParam ? parseInt(sinceParam, 10) : undefined;
-  const tail = tailParam ? parseInt(tailParam, 10) : 500;
+  const tail = tailParam ? parseInt(tailParam, 10) : 2000;
 
   try {
     const logPromises = CONTAINERS.map((container) =>

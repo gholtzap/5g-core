@@ -95,7 +95,7 @@ const NAS_PATTERNS = [
     }),
   },
   {
-    regex: /Sending Authentication Request/i,
+    regex: /Sending Authentication Request|Encoded Authentication Request|Full Authentication Request NAS PDU/i,
     parse: (): ParsedMessage => ({
       source: 'AMF' as NetworkEntity,
       destination: 'UE' as NetworkEntity,
@@ -105,7 +105,7 @@ const NAS_PATTERNS = [
     }),
   },
   {
-    regex: /Decoded Authentication Response/i,
+    regex: /Decoded Authentication Response|Authentication Failure received from UE/i,
     parse: (): ParsedMessage => ({
       source: 'UE' as NetworkEntity,
       destination: 'AMF' as NetworkEntity,
@@ -279,7 +279,7 @@ export function parseLogLine(
   container: string,
   timestamp: string
 ): MessageFlowEntry | null {
-  const cleanLine = logLine.replace(/[\x00-\x08]/g, '').trim();
+  const cleanLine = stripAnsiCodes(logLine).replace(/[\x00-\x08]/g, '').trim();
 
   for (const pattern of ALL_PATTERNS) {
     const match = cleanLine.match(pattern.regex);
@@ -304,8 +304,13 @@ export function parseLogLine(
   return null;
 }
 
+function stripAnsiCodes(text: string): string {
+  return text.replace(/\x1b\[[0-9;]*m/g, '');
+}
+
 export function extractTimestamp(logLine: string): string | null {
-  const timestampMatch = logLine.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z?)\s/);
+  const cleanLine = stripAnsiCodes(logLine);
+  const timestampMatch = cleanLine.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z?)/);
   if (timestampMatch) {
     return timestampMatch[1];
   }
