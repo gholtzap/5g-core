@@ -37,10 +37,28 @@ export default function LogsViewer({ container }: LogsViewerProps) {
   }, [container]);
 
   const detectLogLevel = (message: string): string => {
-    const lowerMessage = message.toLowerCase();
-    if (lowerMessage.includes("error") || lowerMessage.includes("fatal")) return "error";
-    if (lowerMessage.includes("warn")) return "warn";
-    if (lowerMessage.includes("debug")) return "debug";
+    const upperMessage = message.toUpperCase();
+    if (
+      upperMessage.includes("ERROR") ||
+      upperMessage.includes("FATAL") ||
+      upperMessage.includes("CRIT") ||
+      upperMessage.includes("[E]") ||
+      /\bERR\b/.test(upperMessage)
+    )
+      return "error";
+    if (
+      upperMessage.includes("WARN") ||
+      upperMessage.includes("WARNING") ||
+      upperMessage.includes("[W]")
+    )
+      return "warn";
+    if (
+      upperMessage.includes("DEBUG") ||
+      upperMessage.includes("[D]") ||
+      upperMessage.includes("TRACE")
+    )
+      return "debug";
+    if (upperMessage.includes("INFO") || upperMessage.includes("[I]")) return "info";
     return "info";
   };
 
@@ -55,8 +73,51 @@ export default function LogsViewer({ container }: LogsViewerProps) {
     setLogs([]);
   };
 
-  const getLogColor = (message: string): string => {
-    const level = detectLogLevel(message);
+  const getLevelBadgeStyle = (level: string) => {
+    const baseStyle = {
+      display: "inline-block",
+      padding: "2px 6px",
+      borderRadius: "4px",
+      fontSize: "10px",
+      fontWeight: 600,
+      marginRight: "8px",
+      minWidth: "45px",
+      textAlign: "center" as const,
+    };
+
+    switch (level) {
+      case "error":
+        return {
+          ...baseStyle,
+          backgroundColor: "rgba(239, 68, 68, 0.15)",
+          color: "var(--status-error)",
+          border: "1px solid rgba(239, 68, 68, 0.3)",
+        };
+      case "warn":
+        return {
+          ...baseStyle,
+          backgroundColor: "rgba(245, 158, 11, 0.15)",
+          color: "var(--status-warning)",
+          border: "1px solid rgba(245, 158, 11, 0.3)",
+        };
+      case "debug":
+        return {
+          ...baseStyle,
+          backgroundColor: "rgba(107, 114, 128, 0.15)",
+          color: "var(--text-muted)",
+          border: "1px solid rgba(107, 114, 128, 0.3)",
+        };
+      default:
+        return {
+          ...baseStyle,
+          backgroundColor: "rgba(59, 130, 246, 0.15)",
+          color: "var(--accent-blue)",
+          border: "1px solid rgba(59, 130, 246, 0.3)",
+        };
+    }
+  };
+
+  const getLogColor = (level: string): string => {
     switch (level) {
       case "error":
         return "var(--status-error)";
@@ -157,22 +218,28 @@ export default function LogsViewer({ container }: LogsViewerProps) {
             {logs.length === 0 ? "Waiting for logs..." : "No logs match the current filters"}
           </div>
         ) : (
-          filteredLogs.map((log, index) => (
-            <div
-              key={index}
-              style={{
-                padding: "4px 0",
-                borderBottom: "1px solid var(--border-subtle)",
-                wordWrap: "break-word",
-                color: getLogColor(log.message),
-              }}
-            >
-              <span style={{ color: "var(--text-muted)", marginRight: "8px" }}>
-                {new Date(log.timestamp).toLocaleTimeString()}
-              </span>
-              {log.message}
-            </div>
-          ))
+          filteredLogs.map((log, index) => {
+            const level = detectLogLevel(log.message);
+            return (
+              <div
+                key={index}
+                style={{
+                  padding: "6px 0",
+                  borderBottom: "1px solid var(--border-subtle)",
+                  wordWrap: "break-word",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "8px",
+                }}
+              >
+                <span style={{ color: "var(--text-muted)", fontSize: "11px", minWidth: "70px" }}>
+                  {new Date(log.timestamp).toLocaleTimeString()}
+                </span>
+                <span style={getLevelBadgeStyle(level)}>{level.toUpperCase()}</span>
+                <span style={{ flex: 1, color: getLogColor(level) }}>{log.message}</span>
+              </div>
+            );
+          })
         )}
       </div>
 
