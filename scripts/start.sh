@@ -15,6 +15,7 @@ show_menu() {
         "Clean Start" \
         "Custom" \
         "Update Submodules" \
+        "Rebuild Web UI" \
         "Exit")
 }
 
@@ -143,6 +144,30 @@ do_update_submodules() {
 
     update_submodules
     commit_push
+}
+
+do_rebuild_webui() {
+    gum style --foreground 86 --bold "Rebuild Web UI"
+    echo ""
+
+    gum style --foreground 220 "Stopping web-ui..."
+    docker compose stop web-ui
+    gum style --foreground 42 "✓ Web UI stopped"
+    echo ""
+
+    gum style --foreground 220 "Rebuilding web-ui with --no-cache..."
+    docker compose build --no-cache web-ui
+    gum style --foreground 42 "✓ Web UI rebuilt"
+    echo ""
+
+    gum style --foreground 220 "Starting web-ui..."
+    docker compose up -d web-ui
+    gum style --foreground 42 "✓ Web UI started"
+    echo ""
+
+    gum style --foreground 86 --bold "Web Dashboard:"
+    gum style --foreground 255 "  http://localhost:3001"
+    echo ""
 }
 
 update_submodules() {
@@ -290,6 +315,7 @@ while true; do
         "Clean Start") do_clean_start; break ;;
         "Custom") do_custom; break ;;
         "Update Submodules") do_update_submodules; break ;;
+        "Rebuild Web UI") do_rebuild_webui; break ;;
         "Exit")
             gum style --foreground 244 "Exiting..."
             exit 0
