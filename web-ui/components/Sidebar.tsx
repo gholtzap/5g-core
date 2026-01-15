@@ -1,6 +1,6 @@
 "use client";
 
-import { House, ChartLine, Users, Database, ChartLineUp } from "@phosphor-icons/react";
+import { House, ChartLine, Users, Database, ChartLineUp, IdentificationCard } from "@phosphor-icons/react";
 
 interface SidebarProps {
   activePage?: string;
@@ -11,6 +11,7 @@ export default function Sidebar({ activePage = "dashboard" }: SidebarProps) {
     { id: "dashboard", label: "Dashboard", icon: House },
     { id: "network-functions", label: "Network Functions", icon: ChartLine },
     { id: "subscribers", label: "Subscribers", icon: Users },
+    { id: "subscriber-profiles", label: "Subscriber Profiles", icon: IdentificationCard },
     { id: "sessions", label: "Sessions", icon: Database },
     { id: "metrics", label: "Metrics", icon: ChartLineUp },
   ];

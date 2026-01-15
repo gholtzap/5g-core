@@ -1,31 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import Card from "@/components/Card";
-import StatusBadge from "@/components/StatusBadge";
-import { DeviceMobile, WifiHigh } from "@phosphor-icons/react";
-
-interface Subscriber {
-  imsi: string;
-  imei: string;
-  status: "online" | "offline";
-  registeredAt: string;
-  lastSeen: string;
-  tac: string;
-  cellId: string;
-}
+import { MagnifyingGlass, User } from "@phosphor-icons/react";
+import { SubscriberProfile } from "@/types/subscriber";
 
 export default function SubscribersPage() {
-  const [subscribers] = useState<Subscriber[]>([
-    { imsi: "999700000000001", imei: "353490000000001", status: "online", registeredAt: "2026-01-14 10:23:15", lastSeen: "2026-01-14 14:32:41", tac: "000001", cellId: "0x01" },
-    { imsi: "999700000000002", imei: "353490000000002", status: "online", registeredAt: "2026-01-14 09:15:22", lastSeen: "2026-01-14 14:32:38", tac: "000001", cellId: "0x01" },
-    { imsi: "999700000000003", imei: "353490000000003", status: "offline", registeredAt: "2026-01-13 16:42:33", lastSeen: "2026-01-14 08:21:19", tac: "000001", cellId: "0x01" },
-    { imsi: "999700000000004", imei: "353490000000004", status: "online", registeredAt: "2026-01-14 11:08:47", lastSeen: "2026-01-14 14:32:40", tac: "000001", cellId: "0x02" },
-    { imsi: "999700000000005", imei: "353490000000005", status: "online", registeredAt: "2026-01-14 08:33:12", lastSeen: "2026-01-14 14:32:39", tac: "000001", cellId: "0x02" },
-  ]);
+  const [subscribers, setSubscribers] = useState<SubscriberProfile[]>([]);
+  const [filteredSubscribers, setFilteredSubscribers] = useState<SubscriberProfile[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [authFilter, setAuthFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
 
-  const onlineCount = subscribers.filter(s => s.status === "online").length;
+  useEffect(() => {
+    fetchSubscribers();
+  }, []);
+
+  useEffect(() => {
+    filterSubscribers();
+  }, [subscribers, searchQuery, authFilter]);
+
+  const fetchSubscribers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/subscribers');
+      if (response.ok) {
+        const data = await response.json();
+        setSubscribers(data);
+      }
+    } catch (error) {
+      console.error('Error fetching subscribers:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterSubscribers = () => {
+    let filtered = subscribers;
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(sub =>
+        sub.supi.toLowerCase().includes(query) ||
+        sub.permanentKey?.toLowerCase().includes(query) ||
+        sub.operatorKey?.toLowerCase().includes(query)
+      );
+    }
+
+    if (authFilter !== 'all') {
+      filtered = filtered.filter(sub => sub.authenticationMethod === authFilter);
+    }
+
+    setFilteredSubscribers(filtered);
+  };
 
   return (
     <DashboardLayout activePage="subscribers">
@@ -35,7 +63,7 @@ export default function SubscribersPage() {
             Subscribers
           </h1>
           <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
-            Registered user equipment and connection status
+            Registered subscriber profiles and authentication data
           </p>
         </div>
 
@@ -48,110 +76,165 @@ export default function SubscribersPage() {
               {subscribers.length}
             </div>
             <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "var(--spacing-xs)" }}>
-              Registered UEs
+              Registered Profiles
             </div>
           </Card>
 
           <Card>
             <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "var(--spacing-sm)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500 }}>
-              Active Now
+              Filtered Results
             </div>
             <div style={{ fontSize: "32px", fontWeight: 600, color: "var(--status-success)" }} className="mono">
-              {onlineCount}
+              {filteredSubscribers.length}
             </div>
             <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "var(--spacing-xs)" }}>
-              Connected Devices
+              Matching Criteria
             </div>
           </Card>
 
           <Card>
             <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "var(--spacing-sm)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500 }}>
-              Connection Rate
+              Authentication
             </div>
             <div style={{ fontSize: "32px", fontWeight: 600, color: "var(--text-primary)" }} className="mono">
-              {Math.round((onlineCount / subscribers.length) * 100)}%
+              5G
             </div>
             <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "var(--spacing-xs)" }}>
-              Active vs Total
+              AKA Method
             </div>
           </Card>
         </div>
 
+        <div style={{ display: "flex", gap: "var(--spacing-lg)", alignItems: "center" }}>
+          <div style={{ position: "relative", flex: 1 }}>
+            <MagnifyingGlass
+              size={16}
+              weight="regular"
+              style={{
+                position: "absolute",
+                left: "var(--spacing-md)",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "var(--text-muted)",
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Search by SUPI, permanent key, or operator key..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 40px",
+                fontSize: "13px",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius-md)",
+                backgroundColor: "var(--bg-primary)",
+                color: "var(--text-primary)",
+                outline: "none",
+              }}
+              onFocus={(e) => e.currentTarget.style.borderColor = "var(--accent)"}
+              onBlur={(e) => e.currentTarget.style.borderColor = "var(--border)"}
+            />
+          </div>
+
+          <select
+            value={authFilter}
+            onChange={(e) => setAuthFilter(e.target.value)}
+            style={{
+              padding: "var(--spacing-sm) var(--spacing-md)",
+              fontSize: "13px",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-md)",
+              backgroundColor: "var(--bg-primary)",
+              color: "var(--text-primary)",
+              outline: "none",
+              cursor: "pointer",
+            }}
+          >
+            <option value="all">All Methods</option>
+            <option value="5G_AKA">5G AKA</option>
+            <option value="EAP_AKA_PRIME">EAP-AKA'</option>
+          </select>
+        </div>
+
         <div>
           <h2 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "var(--spacing-lg)" }}>
-            Registered Devices
+            Subscriber Profiles
           </h2>
-          <Card style={{ padding: 0 }}>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "48px 1fr 1fr 120px 140px 100px 100px",
-              padding: "var(--spacing-md) var(--spacing-lg)",
-              borderBottom: "1px solid var(--border-subtle)",
-              fontSize: "11px",
-              color: "var(--text-muted)",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              fontWeight: 500,
-            }}>
-              <div></div>
-              <div>IMSI</div>
-              <div>IMEI</div>
-              <div>Status</div>
-              <div>Registered At</div>
-              <div>TAC</div>
-              <div>Cell ID</div>
-            </div>
-            {subscribers.map((subscriber, index) => (
-              <div
-                key={subscriber.imsi}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "48px 1fr 1fr 120px 140px 100px 100px",
-                  padding: "var(--spacing-lg)",
-                  borderBottom: index < subscribers.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                  alignItems: "center",
-                  transition: "background-color 150ms",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-tertiary)"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-              >
-                <div style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "var(--radius-md)",
-                  backgroundColor: "var(--bg-tertiary)",
-                  border: "1px solid var(--border)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}>
-                  {subscriber.status === "online" ? (
-                    <WifiHigh size={16} weight="duotone" color="var(--status-success)" />
-                  ) : (
-                    <DeviceMobile size={16} weight="duotone" color="var(--text-muted)" />
-                  )}
-                </div>
-                <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
-                  {subscriber.imsi}
-                </div>
-                <div className="mono" style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
-                  {subscriber.imei}
-                </div>
-                <div>
-                  <StatusBadge status={subscriber.status} />
-                </div>
-                <div className="mono" style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                  {subscriber.registeredAt}
-                </div>
-                <div className="mono" style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                  {subscriber.tac}
-                </div>
-                <div className="mono" style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                  {subscriber.cellId}
-                </div>
+          {loading ? (
+            <Card>
+              <div style={{ padding: "var(--spacing-2xl)", textAlign: "center", color: "var(--text-muted)" }}>
+                Loading subscribers...
               </div>
-            ))}
-          </Card>
+            </Card>
+          ) : filteredSubscribers.length === 0 ? (
+            <Card>
+              <div style={{ padding: "var(--spacing-2xl)", textAlign: "center", color: "var(--text-muted)" }}>
+                {searchQuery || authFilter !== 'all' ? 'No subscribers match your search criteria' : 'No subscribers found'}
+              </div>
+            </Card>
+          ) : (
+            <Card style={{ padding: 0 }}>
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "48px 1fr 1fr 1fr 140px",
+                padding: "var(--spacing-md) var(--spacing-lg)",
+                borderBottom: "1px solid var(--border-subtle)",
+                fontSize: "11px",
+                color: "var(--text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                fontWeight: 500,
+              }}>
+                <div></div>
+                <div>SUPI</div>
+                <div>Auth Method</div>
+                <div>PLMN</div>
+                <div>Created At</div>
+              </div>
+              {filteredSubscribers.map((subscriber, index) => (
+                <div
+                  key={subscriber._id?.toString() || subscriber.supi}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "48px 1fr 1fr 1fr 140px",
+                    padding: "var(--spacing-lg)",
+                    borderBottom: index < filteredSubscribers.length - 1 ? "1px solid var(--border-subtle)" : "none",
+                    alignItems: "center",
+                    transition: "background-color 150ms",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-tertiary)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                >
+                  <div style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "var(--radius-md)",
+                    backgroundColor: "var(--bg-tertiary)",
+                    border: "1px solid var(--border)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}>
+                    <User size={16} weight="duotone" color="var(--text-muted)" />
+                  </div>
+                  <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
+                    {subscriber.supi}
+                  </div>
+                  <div style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                    {subscriber.authenticationMethod || '5G_AKA'}
+                  </div>
+                  <div className="mono" style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                    {subscriber.plmn ? `${subscriber.plmn.mcc}-${subscriber.plmn.mnc}` : 'N/A'}
+                  </div>
+                  <div className="mono" style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                    {subscriber.createdAt ? new Date(subscriber.createdAt).toLocaleString() : 'N/A'}
+                  </div>
+                </div>
+              ))}
+            </Card>
+          )}
         </div>
       </div>
     </DashboardLayout>
