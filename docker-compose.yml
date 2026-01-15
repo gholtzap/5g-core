@@ -245,5 +245,20 @@ services:
     stdin_open: true
     tty: true
 
+  web-ui:
+    build:
+      context: ./web-ui
+      dockerfile: ../docker/web-ui/Dockerfile
+    container_name: web-ui
+    hostname: web-ui
+    networks:
+      5g-core-net:
+        ipv4_address: 10.53.1.200
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
 volumes:
   mongodb-data:
