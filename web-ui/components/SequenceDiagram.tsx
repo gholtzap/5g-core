@@ -1,19 +1,19 @@
 'use client';
 
 import { MessageFlowEntry } from '@/types/message-flow';
-import { ArrowRight } from '@phosphor-icons/react';
+import { ArrowRight, Clock } from '@phosphor-icons/react';
 
 interface SequenceDiagramProps {
   messages: MessageFlowEntry[];
   selectedEntities?: string[];
 }
 
-const MESSAGE_TYPE_COLORS: Record<string, string> = {
-  NGAP: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-  NAS: 'bg-green-500/10 text-green-400 border-green-500/30',
-  HTTP: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-  PFCP: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-  GTP: 'bg-pink-500/10 text-pink-400 border-pink-500/30',
+const MESSAGE_TYPE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+  NGAP: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
+  NAS: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
+  HTTP: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
+  PFCP: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/20' },
+  GTP: { bg: 'bg-pink-500/10', text: 'text-pink-400', border: 'border-pink-500/20' },
 };
 
 export default function SequenceDiagram({ messages }: SequenceDiagramProps) {
@@ -23,39 +23,50 @@ export default function SequenceDiagram({ messages }: SequenceDiagramProps) {
   };
 
   return (
-    <div className="space-y-2">
-      {messages.map((message) => {
-        const typeColor = MESSAGE_TYPE_COLORS[message.messageType] || 'bg-gray-500/10 text-gray-400 border-gray-500/30';
+    <div className="space-y-1.5">
+      {messages.map((message, index) => {
+        const typeStyle = MESSAGE_TYPE_STYLES[message.messageType] || {
+          bg: 'bg-gray-500/10',
+          text: 'text-gray-400',
+          border: 'border-gray-500/20'
+        };
 
         return (
           <div
             key={message.id}
-            className="flex items-center gap-3 p-3 bg-secondary hover:bg-tertiary transition-colors rounded-md border border-border"
+            className="group relative"
           >
-            <div className="text-xs text-text-muted font-mono w-24 flex-shrink-0">
-              {formatTime(message.timestamp)}
-            </div>
+            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-accent-blue to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-            <div className="flex items-center gap-2 flex-1">
-              <span className="px-3 py-1 bg-tertiary text-text-primary rounded text-sm font-medium min-w-[60px] text-center">
-                {message.source}
-              </span>
+            <div className="flex items-center gap-4 p-3.5 bg-secondary/50 hover:bg-secondary border border-border/50 hover:border-border rounded-lg transition-all duration-200 hover:shadow-sm ml-2">
+              <div className="flex items-center gap-2 text-text-muted min-w-[100px]">
+                <Clock size={14} weight="bold" className="opacity-50" />
+                <span className="text-xs font-mono">
+                  {formatTime(message.timestamp)}
+                </span>
+              </div>
 
-              <ArrowRight size={16} weight="bold" className="text-text-muted flex-shrink-0" />
+              <div className="flex items-center gap-3 min-w-[240px]">
+                <div className="px-3 py-1.5 bg-tertiary/80 text-text-primary rounded-md text-sm font-medium min-w-[70px] text-center shadow-sm">
+                  {message.source}
+                </div>
 
-              <span className="px-3 py-1 bg-tertiary text-text-primary rounded text-sm font-medium min-w-[60px] text-center">
-                {message.destination}
-              </span>
-            </div>
+                <ArrowRight size={18} weight="bold" className="text-accent-blue/60 flex-shrink-0" />
 
-            <div className="flex items-center gap-2 flex-1">
-              <span className="text-sm text-text-primary font-medium flex-1">
-                {message.messageName}
-              </span>
+                <div className="px-3 py-1.5 bg-tertiary/80 text-text-primary rounded-md text-sm font-medium min-w-[70px] text-center shadow-sm">
+                  {message.destination}
+                </div>
+              </div>
 
-              <span className={`px-2 py-1 rounded text-xs font-medium border ${typeColor}`}>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm text-text-primary font-medium truncate">
+                  {message.messageName}
+                </div>
+              </div>
+
+              <div className={`px-3 py-1 rounded-md text-xs font-semibold border ${typeStyle.bg} ${typeStyle.text} ${typeStyle.border} tracking-wide`}>
                 {message.messageType}
-              </span>
+              </div>
             </div>
           </div>
         );
