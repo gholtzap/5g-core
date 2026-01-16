@@ -1,187 +1,157 @@
 'use client';
 
-import { MessageFlowEntry, NetworkEntity } from '@/types/message-flow';
+import { MessageFlowEntry } from '@/types/message-flow';
+import { ArrowRight, Clock } from '@phosphor-icons/react';
+import { useState } from 'react';
+import { getNFByName } from '@/lib/nf-config';
 
 interface SequenceDiagramProps {
   messages: MessageFlowEntry[];
-  selectedEntities?: NetworkEntity[];
+  selectedEntities?: string[];
 }
 
-const ENTITY_ORDER: NetworkEntity[] = ['UE', 'gNB', 'AMF', 'AUSF', 'UDM', 'NRF', 'SMF', 'UPF', 'NSSF', 'PCF'];
-
-const MESSAGE_TYPE_COLORS: Record<string, string> = {
-  NGAP: '#3b82f6',
-  NAS: '#10b981',
-  HTTP: '#f59e0b',
-  PFCP: '#8b5cf6',
-  GTP: '#ec4899',
+const MESSAGE_TYPE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  NGAP: { bg: 'rgba(59, 130, 246, 0.1)', text: '#60a5fa', border: 'rgba(59, 130, 246, 0.2)' },
+  NAS: { bg: 'rgba(16, 185, 129, 0.1)', text: '#34d399', border: 'rgba(16, 185, 129, 0.2)' },
+  HTTP: { bg: 'rgba(245, 158, 11, 0.1)', text: '#fbbf24', border: 'rgba(245, 158, 11, 0.2)' },
+  PFCP: { bg: 'rgba(168, 85, 247, 0.1)', text: '#a78bfa', border: 'rgba(168, 85, 247, 0.2)' },
+  GTP: { bg: 'rgba(236, 72, 153, 0.1)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.2)' },
 };
 
-const LANE_WIDTH = 120;
-const LANE_SPACING = 20;
-const MESSAGE_HEIGHT = 60;
-const HEADER_HEIGHT = 80;
-const FOOTER_HEIGHT = 40;
-const ARROW_HEIGHT = 8;
-
-export default function SequenceDiagram({ messages, selectedEntities }: SequenceDiagramProps) {
-  const activeEntities = selectedEntities && selectedEntities.length > 0
-    ? ENTITY_ORDER.filter(entity => selectedEntities.includes(entity))
-    : ENTITY_ORDER.filter(entity =>
-        messages.some(m => m.source === entity || m.destination === entity)
-      );
-
-  const entityPositions = new Map<NetworkEntity, number>();
-  activeEntities.forEach((entity, index) => {
-    entityPositions.set(entity, index * (LANE_WIDTH + LANE_SPACING) + LANE_WIDTH / 2);
-  });
-
-  const totalWidth = activeEntities.length * (LANE_WIDTH + LANE_SPACING) + LANE_SPACING;
-  const totalHeight = HEADER_HEIGHT + messages.length * MESSAGE_HEIGHT + FOOTER_HEIGHT;
+export default function SequenceDiagram({ messages }: SequenceDiagramProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour12: false, fractionalSecondDigits: 3 });
   };
 
+  const renderEntityBox = (entityName: string) => {
+    const nfConfig = getNFByName(entityName);
+    const boxStyle = {
+      padding: '6px var(--spacing-md)',
+      backgroundColor: 'var(--bg-tertiary)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-md)',
+      fontSize: '13px',
+      fontWeight: 500,
+      minWidth: '70px',
+      textAlign: 'center' as const,
+      color: 'var(--text-primary)',
+      transition: 'background-color 150ms, border-color 150ms',
+    };
+
+    if (nfConfig) {
+      return (
+        <a
+          href={`/network-functions/${nfConfig.id}`}
+          style={{
+            ...boxStyle,
+            textDecoration: 'none',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+            e.currentTarget.style.borderColor = 'var(--accent-blue)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)';
+            e.currentTarget.style.borderColor = 'var(--border)';
+          }}
+        >
+          {entityName}
+        </a>
+      );
+    }
+
+    return <div style={boxStyle}>{entityName}</div>;
+  };
+
   return (
-    <div className="overflow-x-auto">
-      <svg
-        width={totalWidth}
-        height={totalHeight}
-        className="bg-primary"
-        style={{ minWidth: '800px' }}
-      >
-        <defs>
-          <marker
-            id="arrowhead"
-            markerWidth="10"
-            markerHeight="10"
-            refX="9"
-            refY="3"
-            orient="auto"
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
+      {messages.map((message, index) => {
+        const typeColors = MESSAGE_TYPE_COLORS[message.messageType] || {
+          bg: 'var(--status-neutral-subtle)',
+          text: 'var(--text-secondary)',
+          border: 'var(--border)'
+        };
+        const isHovered = hoveredIndex === index;
+
+        return (
+          <div
+            key={message.id}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-lg)',
+              padding: 'var(--spacing-md)',
+              backgroundColor: isHovered ? 'var(--bg-tertiary)' : 'transparent',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-md)',
+              transition: 'background-color 150ms, border-color 150ms',
+              borderColor: isHovered ? 'var(--border)' : 'var(--border-subtle)',
+            }}
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
           >
-            <polygon points="0 0, 10 3, 0 6" fill="currentColor" />
-          </marker>
-        </defs>
-
-        {activeEntities.map((entity, index) => {
-          const x = index * (LANE_WIDTH + LANE_SPACING) + LANE_WIDTH / 2;
-          return (
-            <g key={entity}>
-              <rect
-                x={x - 40}
-                y={20}
-                width={80}
-                height={40}
-                fill="var(--color-secondary)"
-                stroke="var(--color-border)"
-                strokeWidth="1"
-                rx="4"
-              />
-              <text
-                x={x}
-                y={45}
-                textAnchor="middle"
-                fill="var(--color-text-primary)"
-                fontSize="14"
-                fontWeight="600"
-              >
-                {entity}
-              </text>
-
-              <line
-                x1={x}
-                y1={HEADER_HEIGHT}
-                x2={x}
-                y2={totalHeight - FOOTER_HEIGHT}
-                stroke="var(--color-border)"
-                strokeWidth="2"
-                strokeDasharray="5,5"
-              />
-            </g>
-          );
-        })}
-
-        {messages.map((message, index) => {
-          const sourceX = entityPositions.get(message.source);
-          const destX = entityPositions.get(message.destination);
-
-          if (sourceX === undefined || destX === undefined) return null;
-
-          const y = HEADER_HEIGHT + index * MESSAGE_HEIGHT + MESSAGE_HEIGHT / 2;
-          const isForward = sourceX < destX;
-          const startX = isForward ? sourceX : destX;
-          const endX = isForward ? destX : sourceX;
-          const direction = isForward ? 1 : -1;
-
-          const color = MESSAGE_TYPE_COLORS[message.messageType] || '#6b7280';
-
-          return (
-            <g key={message.id}>
-              <line
-                x1={sourceX}
-                y1={y}
-                x2={destX}
-                y2={y}
-                stroke={color}
-                strokeWidth="2"
-                markerEnd="url(#arrowhead)"
-                style={{ color }}
-              />
-
-              <rect
-                x={startX + (endX - startX) / 2 - 80}
-                y={y - 20}
-                width={160}
-                height={24}
-                fill="var(--color-secondary)"
-                stroke={color}
-                strokeWidth="1"
-                rx="4"
-              />
-
-              <text
-                x={startX + (endX - startX) / 2}
-                y={y - 4}
-                textAnchor="middle"
-                fill="var(--color-text-primary)"
-                fontSize="11"
-                fontWeight="500"
-              >
-                {message.messageName}
-              </text>
-
-              <text
-                x={10}
-                y={y + 4}
-                fill="var(--color-text-muted)"
-                fontSize="10"
-              >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-sm)',
+              minWidth: '100px',
+              color: 'var(--text-muted)',
+            }}>
+              <Clock size={14} weight="bold" style={{ opacity: 0.5 }} />
+              <span className="mono" style={{ fontSize: '11px' }}>
                 {formatTime(message.timestamp)}
-              </text>
+              </span>
+            </div>
 
-              <rect
-                x={startX + (endX - startX) / 2 - 80}
-                y={y + 6}
-                width={160}
-                height={16}
-                fill="var(--color-tertiary)"
-                rx="3"
-              />
-              <text
-                x={startX + (endX - startX) / 2}
-                y={y + 16}
-                textAnchor="middle"
-                fill="var(--color-text-secondary)"
-                fontSize="9"
-              >
-                {message.messageType}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-md)',
+              minWidth: '240px',
+            }}>
+              {renderEntityBox(message.source)}
+
+              <ArrowRight size={18} weight="bold" style={{ color: 'var(--accent-blue)', opacity: 0.6, flexShrink: 0 }} />
+
+              {renderEntityBox(message.destination)}
+            </div>
+
+            <div style={{
+              flex: 1,
+              minWidth: 0,
+            }}>
+              <div style={{
+                fontSize: '13px',
+                color: 'var(--text-primary)',
+                fontWeight: 500,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {message.messageName}
+              </div>
+            </div>
+
+            <div style={{
+              padding: '4px var(--spacing-md)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '11px',
+              fontWeight: 600,
+              border: `1px solid ${typeColors.border}`,
+              backgroundColor: typeColors.bg,
+              color: typeColors.text,
+              letterSpacing: '0.025em',
+              textTransform: 'uppercase',
+            }}>
+              {message.messageType}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

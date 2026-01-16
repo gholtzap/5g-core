@@ -26,8 +26,27 @@ async function fetchContainerLogs(
     }
 
     const logs = await container.logs(logOptions) as unknown as Buffer;
-    const logString = logs.toString('utf-8');
-    return logString.split('\n').filter((line) => line.trim());
+
+    const lines: string[] = [];
+    let offset = 0;
+
+    while (offset < logs.length) {
+      if (offset + 8 > logs.length) break;
+
+      const header = logs.subarray(offset, offset + 8);
+      const size = header.readUInt32BE(4);
+
+      if (offset + 8 + size > logs.length) break;
+
+      const logLine = logs.subarray(offset + 8, offset + 8 + size).toString('utf-8');
+      if (logLine.trim()) {
+        lines.push(logLine.trim());
+      }
+
+      offset += 8 + size;
+    }
+
+    return lines;
   } catch (error) {
     console.error(`Failed to fetch logs from ${containerName}:`, error);
     return [];

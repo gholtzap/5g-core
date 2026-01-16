@@ -209,74 +209,91 @@ export default function NetworkFunctionsPage() {
             {nfStatuses.filter(nf => nf.category === "Control Plane").map((nf) => {
               const Icon = iconMap[nf.name] || Heartbeat;
               return (
-                <Card key={nf.name}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--spacing-md)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-md)" }}>
-                      <div style={{
-                        width: "48px",
-                        height: "48px",
-                        borderRadius: "var(--radius-lg)",
-                        backgroundColor: "var(--bg-tertiary)",
-                        border: "1px solid var(--border)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}>
-                        <Icon size={24} weight="duotone" color={nf.status === "online" ? "var(--accent-blue)" : "var(--text-muted)"} />
+                <a
+                  key={nf.name}
+                  href={`/network-functions/${nf.name.toLowerCase()}`}
+                  style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                    transition: "transform 150ms",
+                    display: "block",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }}
+                >
+                  <Card>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--spacing-md)" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-md)" }}>
+                        <div style={{
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "var(--radius-lg)",
+                          backgroundColor: "var(--bg-tertiary)",
+                          border: "1px solid var(--border)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}>
+                          <Icon size={24} weight="duotone" color={nf.status === "online" ? "var(--accent-blue)" : "var(--text-muted)"} />
+                        </div>
+                        <div>
+                          <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "2px" }}>
+                            {nf.name}
+                          </h3>
+                          <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                            {nf.description}
+                          </p>
+                        </div>
+                      </div>
+                      <StatusBadge status={nf.status} />
+                    </div>
+
+                    <div style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(4, 1fr)",
+                      gap: "var(--spacing-md)",
+                      paddingTop: "var(--spacing-md)",
+                      borderTop: "1px solid var(--border-subtle)",
+                    }}>
+                      <div>
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+                          Port
+                        </div>
+                        <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
+                          {nf.port}
+                        </div>
                       </div>
                       <div>
-                        <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "2px" }}>
-                          {nf.name}
-                        </h3>
-                        <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-                          {nf.description}
-                        </p>
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+                          Requests
+                        </div>
+                        <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
+                          {nf.requests}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+                          Latency
+                        </div>
+                        <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
+                          {nf.avgLatency}ms
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+                          Uptime
+                        </div>
+                        <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
+                          {nf.uptime}
+                        </div>
                       </div>
                     </div>
-                    <StatusBadge status={nf.status} />
-                  </div>
-
-                  <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(4, 1fr)",
-                    gap: "var(--spacing-md)",
-                    paddingTop: "var(--spacing-md)",
-                    borderTop: "1px solid var(--border-subtle)",
-                  }}>
-                    <div>
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
-                        Port
-                      </div>
-                      <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
-                        {nf.port}
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
-                        Requests
-                      </div>
-                      <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
-                        {nf.requests}
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
-                        Latency
-                      </div>
-                      <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
-                        {nf.avgLatency}ms
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
-                        Uptime
-                      </div>
-                      <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
-                        {nf.uptime}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                </a>
               );
             })}
           </div>
@@ -290,74 +307,91 @@ export default function NetworkFunctionsPage() {
             {nfStatuses.filter(nf => nf.category === "User Plane").map((nf) => {
               const Icon = iconMap[nf.name] || Heartbeat;
               return (
-                <Card key={nf.name}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--spacing-md)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-md)" }}>
-                      <div style={{
-                        width: "48px",
-                        height: "48px",
-                        borderRadius: "var(--radius-lg)",
-                        backgroundColor: "var(--bg-tertiary)",
-                        border: "1px solid var(--border)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}>
-                        <Icon size={24} weight="duotone" color={nf.status === "online" ? "var(--accent-blue)" : "var(--text-muted)"} />
+                <a
+                  key={nf.name}
+                  href={`/network-functions/${nf.name.toLowerCase()}`}
+                  style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                    transition: "transform 150ms",
+                    display: "block",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }}
+                >
+                  <Card>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--spacing-md)" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-md)" }}>
+                        <div style={{
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "var(--radius-lg)",
+                          backgroundColor: "var(--bg-tertiary)",
+                          border: "1px solid var(--border)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}>
+                          <Icon size={24} weight="duotone" color={nf.status === "online" ? "var(--accent-blue)" : "var(--text-muted)"} />
+                        </div>
+                        <div>
+                          <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "2px" }}>
+                            {nf.name}
+                          </h3>
+                          <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                            {nf.description}
+                          </p>
+                        </div>
+                      </div>
+                      <StatusBadge status={nf.status} />
+                    </div>
+
+                    <div style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(4, 1fr)",
+                      gap: "var(--spacing-md)",
+                      paddingTop: "var(--spacing-md)",
+                      borderTop: "1px solid var(--border-subtle)",
+                    }}>
+                      <div>
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+                          Port
+                        </div>
+                        <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
+                          {nf.port}
+                        </div>
                       </div>
                       <div>
-                        <h3 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "2px" }}>
-                          {nf.name}
-                        </h3>
-                        <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-                          {nf.description}
-                        </p>
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+                          Requests
+                        </div>
+                        <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
+                          {nf.requests}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+                          Latency
+                        </div>
+                        <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
+                          {nf.avgLatency}ms
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+                          Uptime
+                        </div>
+                        <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
+                          {nf.uptime}
+                        </div>
                       </div>
                     </div>
-                    <StatusBadge status={nf.status} />
-                  </div>
-
-                  <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(4, 1fr)",
-                    gap: "var(--spacing-md)",
-                    paddingTop: "var(--spacing-md)",
-                    borderTop: "1px solid var(--border-subtle)",
-                  }}>
-                    <div>
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
-                        Port
-                      </div>
-                      <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
-                        {nf.port}
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
-                        Requests
-                      </div>
-                      <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
-                        {nf.requests}
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
-                        Latency
-                      </div>
-                      <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
-                        {nf.avgLatency}ms
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
-                        Uptime
-                      </div>
-                      <div className="mono" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
-                        {nf.uptime}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                </a>
               );
             })}
           </div>
