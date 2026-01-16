@@ -3,6 +3,7 @@
 import { MessageFlowEntry } from '@/types/message-flow';
 import { ArrowRight, Clock } from '@phosphor-icons/react';
 import { useState } from 'react';
+import { getNFByName } from '@/lib/nf-config';
 
 interface SequenceDiagramProps {
   messages: MessageFlowEntry[];
@@ -23,6 +24,47 @@ export default function SequenceDiagram({ messages }: SequenceDiagramProps) {
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour12: false, fractionalSecondDigits: 3 });
+  };
+
+  const renderEntityBox = (entityName: string) => {
+    const nfConfig = getNFByName(entityName);
+    const boxStyle = {
+      padding: '6px var(--spacing-md)',
+      backgroundColor: 'var(--bg-tertiary)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-md)',
+      fontSize: '13px',
+      fontWeight: 500,
+      minWidth: '70px',
+      textAlign: 'center' as const,
+      color: 'var(--text-primary)',
+      transition: 'background-color 150ms, border-color 150ms',
+    };
+
+    if (nfConfig) {
+      return (
+        <a
+          href={`/network-functions/${nfConfig.id}`}
+          style={{
+            ...boxStyle,
+            textDecoration: 'none',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--bg-elevated)';
+            e.currentTarget.style.borderColor = 'var(--accent-blue)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)';
+            e.currentTarget.style.borderColor = 'var(--border)';
+          }}
+        >
+          {entityName}
+        </a>
+      );
+    }
+
+    return <div style={boxStyle}>{entityName}</div>;
   };
 
   return (
@@ -71,35 +113,11 @@ export default function SequenceDiagram({ messages }: SequenceDiagramProps) {
               gap: 'var(--spacing-md)',
               minWidth: '240px',
             }}>
-              <div style={{
-                padding: '6px var(--spacing-md)',
-                backgroundColor: 'var(--bg-tertiary)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '13px',
-                fontWeight: 500,
-                minWidth: '70px',
-                textAlign: 'center',
-                color: 'var(--text-primary)',
-              }}>
-                {message.source}
-              </div>
+              {renderEntityBox(message.source)}
 
               <ArrowRight size={18} weight="bold" style={{ color: 'var(--accent-blue)', opacity: 0.6, flexShrink: 0 }} />
 
-              <div style={{
-                padding: '6px var(--spacing-md)',
-                backgroundColor: 'var(--bg-tertiary)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '13px',
-                fontWeight: 500,
-                minWidth: '70px',
-                textAlign: 'center',
-                color: 'var(--text-primary)',
-              }}>
-                {message.destination}
-              </div>
+              {renderEntityBox(message.destination)}
             </div>
 
             <div style={{
