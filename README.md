@@ -10,7 +10,7 @@ Your cell phone talks to a cell tower, which talks to the mobile core.
 
 Cell Phone <-> Cell Tower <-> Mobile Core
 
-<img width="405" height="711" alt="Screenshot 2026-01-07 at 9 40 51 AM" src="https://github.com/user-attachments/assets/2d5e42e1-c1f2-4c5e-9efc-e39b0daa48a5" />
+<img width="1506" height="814" alt="Screenshot 2026-01-15 at 11 47 34 PM" src="https://github.com/user-attachments/assets/1b0f6660-fa30-4edd-9605-5da2555ed248" />
 
 A complete 5G Mobile Core implementation, designed for 5G SA, with the following Network Functions:
 - **NRF** (Network Repository Function) <img src="img/typescript.svg" alt="TypeScript" width="20" height="20">
