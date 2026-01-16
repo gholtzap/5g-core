@@ -2,71 +2,134 @@
 
 import { MessageFlowEntry } from '@/types/message-flow';
 import { ArrowRight, Clock } from '@phosphor-icons/react';
+import { useState } from 'react';
 
 interface SequenceDiagramProps {
   messages: MessageFlowEntry[];
   selectedEntities?: string[];
 }
 
-const MESSAGE_TYPE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
-  NGAP: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
-  NAS: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
-  HTTP: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
-  PFCP: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/20' },
-  GTP: { bg: 'bg-pink-500/10', text: 'text-pink-400', border: 'border-pink-500/20' },
+const MESSAGE_TYPE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  NGAP: { bg: 'rgba(59, 130, 246, 0.1)', text: '#60a5fa', border: 'rgba(59, 130, 246, 0.2)' },
+  NAS: { bg: 'rgba(16, 185, 129, 0.1)', text: '#34d399', border: 'rgba(16, 185, 129, 0.2)' },
+  HTTP: { bg: 'rgba(245, 158, 11, 0.1)', text: '#fbbf24', border: 'rgba(245, 158, 11, 0.2)' },
+  PFCP: { bg: 'rgba(168, 85, 247, 0.1)', text: '#a78bfa', border: 'rgba(168, 85, 247, 0.2)' },
+  GTP: { bg: 'rgba(236, 72, 153, 0.1)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.2)' },
 };
 
 export default function SequenceDiagram({ messages }: SequenceDiagramProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour12: false, fractionalSecondDigits: 3 });
   };
 
   return (
-    <div className="space-y-1.5">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
       {messages.map((message, index) => {
-        const typeStyle = MESSAGE_TYPE_STYLES[message.messageType] || {
-          bg: 'bg-gray-500/10',
-          text: 'text-gray-400',
-          border: 'border-gray-500/20'
+        const typeColors = MESSAGE_TYPE_COLORS[message.messageType] || {
+          bg: 'var(--status-neutral-subtle)',
+          text: 'var(--text-secondary)',
+          border: 'var(--border)'
         };
+        const isHovered = hoveredIndex === index;
 
         return (
           <div
             key={message.id}
-            className="group relative"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-lg)',
+              padding: 'var(--spacing-md)',
+              backgroundColor: isHovered ? 'var(--bg-tertiary)' : 'transparent',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-md)',
+              transition: 'background-color 150ms, border-color 150ms',
+              borderColor: isHovered ? 'var(--border)' : 'var(--border-subtle)',
+            }}
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
           >
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-accent-blue to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-sm)',
+              minWidth: '100px',
+              color: 'var(--text-muted)',
+            }}>
+              <Clock size={14} weight="bold" style={{ opacity: 0.5 }} />
+              <span className="mono" style={{ fontSize: '11px' }}>
+                {formatTime(message.timestamp)}
+              </span>
+            </div>
 
-            <div className="flex items-center gap-4 p-3.5 bg-secondary/50 hover:bg-secondary border border-border/50 hover:border-border rounded-lg transition-all duration-200 hover:shadow-sm ml-2">
-              <div className="flex items-center gap-2 text-text-muted min-w-[100px]">
-                <Clock size={14} weight="bold" className="opacity-50" />
-                <span className="text-xs font-mono">
-                  {formatTime(message.timestamp)}
-                </span>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-md)',
+              minWidth: '240px',
+            }}>
+              <div style={{
+                padding: '6px var(--spacing-md)',
+                backgroundColor: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '13px',
+                fontWeight: 500,
+                minWidth: '70px',
+                textAlign: 'center',
+                color: 'var(--text-primary)',
+              }}>
+                {message.source}
               </div>
 
-              <div className="flex items-center gap-3 min-w-[240px]">
-                <div className="px-3 py-1.5 bg-tertiary/80 text-text-primary rounded-md text-sm font-medium min-w-[70px] text-center shadow-sm">
-                  {message.source}
-                </div>
+              <ArrowRight size={18} weight="bold" style={{ color: 'var(--accent-blue)', opacity: 0.6, flexShrink: 0 }} />
 
-                <ArrowRight size={18} weight="bold" className="text-accent-blue/60 flex-shrink-0" />
-
-                <div className="px-3 py-1.5 bg-tertiary/80 text-text-primary rounded-md text-sm font-medium min-w-[70px] text-center shadow-sm">
-                  {message.destination}
-                </div>
+              <div style={{
+                padding: '6px var(--spacing-md)',
+                backgroundColor: 'var(--bg-tertiary)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '13px',
+                fontWeight: 500,
+                minWidth: '70px',
+                textAlign: 'center',
+                color: 'var(--text-primary)',
+              }}>
+                {message.destination}
               </div>
+            </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="text-sm text-text-primary font-medium truncate">
-                  {message.messageName}
-                </div>
+            <div style={{
+              flex: 1,
+              minWidth: 0,
+            }}>
+              <div style={{
+                fontSize: '13px',
+                color: 'var(--text-primary)',
+                fontWeight: 500,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {message.messageName}
               </div>
+            </div>
 
-              <div className={`px-3 py-1 rounded-md text-xs font-semibold border ${typeStyle.bg} ${typeStyle.text} ${typeStyle.border} tracking-wide`}>
-                {message.messageType}
-              </div>
+            <div style={{
+              padding: '4px var(--spacing-md)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '11px',
+              fontWeight: 600,
+              border: `1px solid ${typeColors.border}`,
+              backgroundColor: typeColors.bg,
+              color: typeColors.text,
+              letterSpacing: '0.025em',
+              textTransform: 'uppercase',
+            }}>
+              {message.messageType}
             </div>
           </div>
         );

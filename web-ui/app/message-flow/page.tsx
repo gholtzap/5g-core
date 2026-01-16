@@ -98,20 +98,34 @@ export default function MessageFlowPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2xl)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h1 className="text-2xl font-semibold text-text-primary">
+            <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: 'var(--spacing-xs)' }}>
               Message Flow Tracer
             </h1>
-            <p className="text-text-secondary mt-1">
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
               Visual sequence diagram of NAS/NGAP protocol messages
             </p>
           </div>
-          <div className="flex gap-2">
+          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
             <button
               onClick={() => setPaused(!paused)}
-              className="px-4 py-2 bg-secondary hover:bg-tertiary text-text-primary rounded-md transition-colors flex items-center gap-2"
+              style={{
+                padding: 'var(--spacing-sm) var(--spacing-md)',
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '13px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--spacing-sm)',
+                transition: 'background-color 150ms',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
             >
               {paused ? (
                 <>
@@ -127,8 +141,23 @@ export default function MessageFlowPage() {
             </button>
             <button
               onClick={fetchMessages}
-              className="px-4 py-2 bg-secondary hover:bg-tertiary text-text-primary rounded-md transition-colors flex items-center gap-2"
               disabled={loading}
+              style={{
+                padding: 'var(--spacing-sm) var(--spacing-md)',
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '13px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--spacing-sm)',
+                transition: 'background-color 150ms',
+                opacity: loading ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)')}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
             >
               <ArrowsClockwise size={18} weight="bold" />
               Refresh
@@ -137,24 +166,56 @@ export default function MessageFlowPage() {
         </div>
 
         <Card>
-          <div className="space-y-4">
-            <div className="flex gap-4 items-start">
-              <div className="flex-1 relative">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
+            <div style={{ display: 'flex', gap: 'var(--spacing-lg)', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1, position: 'relative' }}>
                 <MagnifyingGlass
-                  size={20}
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted"
+                  size={16}
+                  weight="regular"
+                  style={{
+                    position: 'absolute',
+                    left: 'var(--spacing-md)',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--text-muted)',
+                  }}
                 />
                 <input
                   type="text"
                   placeholder="Search messages..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-secondary border border-border rounded-md text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                  style={{
+                    width: '100%',
+                    padding: 'var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 40px',
+                    fontSize: '13px',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-md)',
+                    backgroundColor: 'var(--bg-primary)',
+                    color: 'var(--text-primary)',
+                    outline: 'none',
+                  }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = 'var(--accent-blue)'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
                 />
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="px-4 py-2 bg-secondary hover:bg-tertiary text-text-primary rounded-md transition-colors flex items-center gap-2"
+                style={{
+                  padding: 'var(--spacing-sm) var(--spacing-md)',
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--spacing-sm)',
+                  transition: 'background-color 150ms',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
               >
                 <Funnel size={18} weight="bold" />
                 Filters
@@ -162,31 +223,76 @@ export default function MessageFlowPage() {
             </div>
 
             {showFilters && (
-              <div className="space-y-4 p-4 bg-secondary rounded-md">
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-lg)',
+                padding: 'var(--spacing-lg)',
+                backgroundColor: 'var(--bg-tertiary)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-subtle)',
+              }}>
                 <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-sm font-medium text-text-primary">
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 'var(--spacing-sm)',
+                  }}>
+                    <label style={{
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      color: 'var(--text-primary)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                    }}>
                       Network Entities
                     </label>
                     {selectedEntities.length > 0 && (
                       <button
                         onClick={clearFilters}
-                        className="text-xs text-accent-blue hover:underline"
+                        style={{
+                          fontSize: '11px',
+                          color: 'var(--accent-blue)',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                        }}
                       >
                         Clear all
                       </button>
                     )}
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-sm)' }}>
                     {ALL_ENTITIES.map((entity) => (
                       <button
                         key={entity}
                         onClick={() => toggleEntity(entity)}
-                        className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                          selectedEntities.includes(entity)
-                            ? 'bg-accent-blue text-white'
-                            : 'bg-tertiary text-text-secondary hover:bg-secondary'
-                        }`}
+                        style={{
+                          padding: '6px var(--spacing-md)',
+                          borderRadius: 'var(--radius-md)',
+                          fontSize: '13px',
+                          border: '1px solid var(--border)',
+                          backgroundColor: selectedEntities.includes(entity)
+                            ? 'var(--accent-blue)'
+                            : 'var(--bg-secondary)',
+                          color: selectedEntities.includes(entity)
+                            ? 'white'
+                            : 'var(--text-secondary)',
+                          cursor: 'pointer',
+                          transition: 'all 150ms',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!selectedEntities.includes(entity)) {
+                            e.currentTarget.style.backgroundColor = 'var(--bg-primary)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!selectedEntities.includes(entity)) {
+                            e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
+                          }
+                        }}
                       >
                         {entity}
                       </button>
@@ -195,19 +301,46 @@ export default function MessageFlowPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-text-primary block mb-2">
+                  <label style={{
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    color: 'var(--text-primary)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    display: 'block',
+                    marginBottom: 'var(--spacing-sm)',
+                  }}>
                     Message Types
                   </label>
-                  <div className="flex flex-wrap gap-2">
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-sm)' }}>
                     {ALL_MESSAGE_TYPES.map((type) => (
                       <button
                         key={type}
                         onClick={() => toggleMessageType(type)}
-                        className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                          selectedMessageTypes.includes(type)
-                            ? 'bg-accent-blue text-white'
-                            : 'bg-tertiary text-text-secondary hover:bg-secondary'
-                        }`}
+                        style={{
+                          padding: '6px var(--spacing-md)',
+                          borderRadius: 'var(--radius-md)',
+                          fontSize: '13px',
+                          border: '1px solid var(--border)',
+                          backgroundColor: selectedMessageTypes.includes(type)
+                            ? 'var(--accent-blue)'
+                            : 'var(--bg-secondary)',
+                          color: selectedMessageTypes.includes(type)
+                            ? 'white'
+                            : 'var(--text-secondary)',
+                          cursor: 'pointer',
+                          transition: 'all 150ms',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!selectedMessageTypes.includes(type)) {
+                            e.currentTarget.style.backgroundColor = 'var(--bg-primary)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!selectedMessageTypes.includes(type)) {
+                            e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
+                          }
+                        }}
                       >
                         {type}
                       </button>
@@ -217,12 +350,29 @@ export default function MessageFlowPage() {
               </div>
             )}
 
-            <div className="flex justify-between items-center text-sm text-text-secondary">
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontSize: '13px',
+              color: 'var(--text-secondary)',
+            }}>
               <div>
                 Showing {filteredMessages.length} of {messages.length} messages
               </div>
-              <div className={`flex items-center gap-2 ${paused ? 'text-warning' : 'text-success'}`}>
-                <div className={`w-2 h-2 rounded-full ${paused ? 'bg-warning' : 'bg-success animate-pulse'}`} />
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--spacing-sm)',
+                color: paused ? 'var(--status-warning)' : 'var(--status-success)',
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: paused ? 'var(--status-warning)' : 'var(--status-success)',
+                  animation: paused ? 'none' : 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                }} />
                 {paused ? 'Paused' : 'Live'}
               </div>
             </div>
@@ -231,13 +381,26 @@ export default function MessageFlowPage() {
 
         <Card>
           {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="text-text-secondary">Loading messages...</div>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '256px',
+            }}>
+              <div style={{ color: 'var(--text-secondary)' }}>Loading messages...</div>
             </div>
           ) : filteredMessages.length === 0 ? (
-            <div className="flex flex-col justify-center items-center h-64">
-              <div className="text-text-secondary mb-2">No messages found</div>
-              <p className="text-sm text-text-muted">
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '256px',
+            }}>
+              <div style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-sm)' }}>
+                No messages found
+              </div>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                 {messages.length === 0
                   ? 'Waiting for protocol messages from the 5G Core...'
                   : 'Try adjusting your filters or search query'}
