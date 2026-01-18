@@ -190,6 +190,7 @@ detect_changed_submodules() {
                 ausf) changed_services+=("ausf") ;;
                 nrf) changed_services+=("nrf") ;;
                 nssf) changed_services+=("nssf") ;;
+                scp) changed_services+=("scp") ;;
                 udm) changed_services+=("udm") ;;
                 smf) changed_services+=("smf") ;;
                 upf) changed_services+=("upf") ;;

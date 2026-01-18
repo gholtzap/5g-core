@@ -26,3 +26,6 @@
 	path = upf
 	url = https://github.com/gholtzap/upf
 	branch = master
+[submodule "scp"]
+	path = scp
+	url = https://github.com/gholtzap/scp

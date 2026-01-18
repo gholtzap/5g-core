@@ -112,6 +112,26 @@ services:
       - ./config/nssf/.env
     restart: unless-stopped
 
+  scp:
+    build:
+      context: ./scp
+      dockerfile: ../docker/scp/Dockerfile
+    container_name: scp
+    hostname: scp
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      nrf:
+        condition: service_healthy
+    networks:
+      5g-core-net:
+        ipv4_address: ${SCP_IP}
+    ports:
+      - "8088:7777"
+    env_file:
+      - ./config/scp/.env
+    restart: unless-stopped
+
   amf:
     build:
       context: ./amf
