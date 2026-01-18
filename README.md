@@ -20,6 +20,7 @@ A complete 5G Mobile Core implementation, designed for 5G SA, with the following
 - **AMF** (Access and Mobility Management Function) <img src="img/rust.png" alt="Rust" width="20" height="20">
 - **SMF** (Session Management Function) <img src="img/rust.png" alt="Rust" width="20" height="20">
 - **UPF** (User Plane Function) <img src="img/rust.png" alt="Rust" width="20" height="20">
+- **SCP** (Service Communication Proxy) <img src="img/rust.png" alt="Rust" width="20" height="20">
 
 
 ## Quick Start
