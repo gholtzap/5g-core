@@ -23,6 +23,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   AUSF: ShieldCheck,
   UDM: Database,
   NSSF: Network,
+  SCP: Network,
   AMF: Broadcast,
   SMF: Heartbeat,
   UPF: CloudArrowUp,
@@ -73,6 +74,17 @@ export default function NetworkFunctionsPage() {
       requests: 128,
       avgLatency: 10,
       uptime: "100%"
+    },
+    {
+      name: "SCP",
+      url: "http://scp:7777",
+      status: "checking",
+      port: 8088,
+      description: "Service Communication Proxy",
+      category: "Control Plane",
+      requests: 1564,
+      avgLatency: 14,
+      uptime: "99.96%"
     },
     {
       name: "AMF",
