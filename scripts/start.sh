@@ -206,7 +206,7 @@ commit_push() {
     gum style --foreground 220 "Committing and pushing changes..."
     git add .
     if git commit -m "Update submodules" 2>/dev/null; then
-        if git push origin master 2>/dev/null; then
+        if git push origin dev 2>/dev/null; then
             gum style --foreground 42 "✓ Changes committed and pushed"
         else
             gum style --foreground 208 "⚠ Commit succeeded but push failed"
