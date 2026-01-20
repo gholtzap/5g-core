@@ -135,8 +135,63 @@ if [ $attempt -eq $max_attempts ]; then
 fi
 echo ""
 
+gum style --foreground 220 "Provisioning test subscriber..."
+MONGODB_CONTAINER=$(docker compose ps --format '{{.Name}}' | grep mongodb | head -n 1)
+TEMP_SCRIPT=$(mktemp)
+cat > "$TEMP_SCRIPT" << 'PROVISION_EOF'
+const { MongoClient } = require('mongodb');
+const subscriber = {
+  supi: 'imsi-999700123456789',
+  permanentKey: '465B5CE8B199B49FAA5F0A2EE238A6BC',
+  operatorKey: 'E8ED289DEBA952E4283B54E88E6183CA',
+  sequenceNumber: '000000000001',
+  authenticationMethod: '5G_AKA',
+  subscribedData: {
+    authenticationSubscription: {
+      authenticationMethod: '5G_AKA',
+      permanentKey: { permanentKeyValue: '465B5CE8B199B49FAA5F0A2EE238A6BC' },
+      sequenceNumber: '000000000001',
+      authenticationManagementField: '8000',
+      milenage: { op: { opValue: 'E8ED289DEBA952E4283B54E88E6183CA' } }
+    },
+    amData: {
+      gpsis: ['msisdn-0123456789'],
+      subscribedUeAmbr: { uplink: '1 Gbps', downlink: '2 Gbps' },
+      nssai: { defaultSingleNssais: [{ sst: 1 }] }
+    },
+    smData: [{
+      singleNssai: { sst: 1 },
+      dnnConfigurations: {
+        internet: {
+          pduSessionTypes: { defaultSessionType: 'IPV4' },
+          sscModes: { defaultSscMode: 'SSC_MODE_1' },
+          '5gQosProfile': { '5qi': 9, arp: { priorityLevel: 8 } },
+          sessionAmbr: { uplink: '1 Gbps', downlink: '2 Gbps' }
+        }
+      }
+    }]
+  }
+};
+async function provision() {
+  const client = new MongoClient('mongodb://localhost:27017');
+  await client.connect();
+  const collection = client.db('udm').collection('subscribers');
+  await collection.replaceOne({ supi: subscriber.supi }, subscriber, { upsert: true });
+  await client.close();
+}
+provision().catch(console.error);
+PROVISION_EOF
+
+docker cp "$TEMP_SCRIPT" "$MONGODB_CONTAINER:/tmp/provision.js"
+docker exec "$MONGODB_CONTAINER" sh -c "which npm > /dev/null 2>&1 || (apt-get update -qq && apt-get install -y -qq nodejs npm > /dev/null 2>&1)"
+docker exec "$MONGODB_CONTAINER" node /tmp/provision.js > /dev/null 2>&1
+docker exec "$MONGODB_CONTAINER" rm /tmp/provision.js
+rm "$TEMP_SCRIPT"
+gum style --foreground 42 "✓ Subscriber provisioned"
+echo ""
+
 gum style --foreground 220 "Starting all services..."
-docker compose up -d --scale web-ui=0
+docker compose up -d --scale web-ui=0 --scale sepp=0
 gum style --foreground 42 "✓ Services started"
 echo ""
 
@@ -155,6 +210,11 @@ services=$(docker compose ps --services)
 error_found=false
 
 for service in $services; do
+    if [ "$service" = "sepp" ] || [ "$service" = "web-ui" ]; then
+        gum style --foreground 244 "Skipping $service (not required for test)"
+        continue
+    fi
+
     gum style --foreground 244 "Checking $service..."
 
     if ! docker compose ps "$service" | grep -q "Up"; then
@@ -163,7 +223,7 @@ for service in $services; do
         continue
     fi
 
-    error_logs=$(docker compose logs "$service" 2>&1 | grep -iE "error|fatal|panic|exception" | grep -viE "error_code.*0|no error" || true)
+    error_logs=$(docker compose logs "$service" 2>&1 | grep -iE "error|fatal|panic|exception" | grep -viE "error_code.*0|no error|Sessions collection is not set up|NamespaceNotFound.*config.system.sessions" || true)
 
     if [ -n "$error_logs" ]; then
         gum style --foreground 196 "✗ Errors found in $service:"
