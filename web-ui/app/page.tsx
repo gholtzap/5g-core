@@ -20,6 +20,7 @@ export default function Home() {
     { name: "AUSF", url: "http://ausf:8080", status: "checking", port: 8081, description: "Authentication Server Function" },
     { name: "UDM", url: "http://udm:8080", status: "checking", port: 8084, description: "Unified Data Management" },
     { name: "NSSF", url: "http://nssf:8080", status: "checking", port: 8083, description: "Network Slice Selection Function" },
+    { name: "SCP", url: "http://scp:7777", status: "checking", port: 8088, description: "Service Communication Proxy" },
     { name: "AMF", url: "http://amf:8000", status: "checking", port: 8086, description: "Access and Mobility Function" },
     { name: "SMF", url: "http://smf:8080", status: "checking", port: 8085, description: "Session Management Function" },
     { name: "UPF", url: "http://upf:8080", status: "checking", port: 8087, description: "User Plane Function" },

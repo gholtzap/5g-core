@@ -120,11 +120,14 @@ echo ""
 
 if git submodule status | grep -q '^-'; then
     gum style --foreground 220 "Initializing submodules..."
-    git submodule update --init --recursive
+    git submodule update --init --recursive --remote
     gum style --foreground 42 "✓ Submodules initialized"
 else
     gum style --foreground 42 "✓ Submodules already initialized"
+    gum style --foreground 220 "Updating submodules to latest..."
+    git submodule update --remote
     git submodule status
+    gum style --foreground 42 "✓ Submodules updated"
 fi
 
 echo ""

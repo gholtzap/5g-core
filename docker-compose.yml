@@ -132,6 +132,29 @@ services:
       - ./config/scp/.env
     restart: unless-stopped
 
+  sepp:
+    build:
+      context: ./sepp
+      dockerfile: ../docker/sepp/Dockerfile
+    container_name: sepp
+    hostname: sepp
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      nrf:
+        condition: service_healthy
+    networks:
+      5g-core-net:
+        ipv4_address: ${SEPP_IP}
+    ports:
+      - "8089:8080"
+    environment:
+      - RUST_LOG=info
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DB_NAME=${MONGODB_DB_NAME}
+      - NRF_URI=${NRF_URI}
+    restart: unless-stopped
+
   amf:
     build:
       context: ./amf
@@ -157,7 +180,7 @@ services:
       - ./config/amf:/app/config:ro
     command: ["/app/amf", "--config", "/app/config/amfcfg.json"]
     environment:
-      - RUST_LOG=debug
+      - RUST_LOG=info
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
