@@ -186,13 +186,15 @@ detect_changed_submodules() {
         while IFS= read -r line; do
             submodule=$(echo "$line" | awk '{print $2}')
             case "$submodule" in
-                amf-rust) changed_services+=("amf") ;;
+                amf) changed_services+=("amf") ;;
                 ausf) changed_services+=("ausf") ;;
                 nrf) changed_services+=("nrf") ;;
                 nssf) changed_services+=("nssf") ;;
                 udm) changed_services+=("udm") ;;
                 smf) changed_services+=("smf") ;;
                 upf) changed_services+=("upf") ;;
+                scp) changed_services+=("scp") ;;
+                sepp) changed_services+=("sepp") ;;
             esac
         done < <(diff /tmp/submodules_before.txt /tmp/submodules_after.txt | grep '^>' | awk '{print $2}')
     fi
