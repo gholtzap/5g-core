@@ -29,6 +29,7 @@
 [submodule "scp"]
 	path = scp
 	url = https://github.com/gholtzap/scp
+	branch = main
 [submodule "sepp"]
 	path = sepp
 	url = https://github.com/gholtzap/SEPP.git
