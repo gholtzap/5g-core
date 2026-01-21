@@ -75,6 +75,18 @@ prerequisites_met=true
 
 if check_command docker "Docker"; then
     gum style --foreground 244 "  $(docker --version)"
+
+    mem_bytes=$(docker info --format '{{.MemTotal}}' 2>/dev/null || echo "0")
+    mem_gb=$((mem_bytes / 1024 / 1024 / 1024))
+
+    if [ "$mem_gb" -lt 16 ]; then
+        gum style --foreground 196 "✗ Docker memory is too low: ${mem_gb}GB (16GB+ required)"
+        gum style --foreground 208 "  Configure Docker Desktop → Settings → Resources → Memory"
+        gum style --foreground 208 "  Set memory to at least 16GB to avoid build failures"
+        prerequisites_met=false
+    else
+        gum style --foreground 42 "  Memory: ${mem_gb}GB"
+    fi
 else
     prerequisites_met=false
     gum style --foreground 208 "  Install from: https://www.docker.com/get-started"
