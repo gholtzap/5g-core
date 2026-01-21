@@ -51,4 +51,4 @@ cd 5g-core
 There's more detailed information on installaton located @  [docs/installation.md](docs/installation.md) 
 
 Common Issues:
-1. `failed to solve: ResourceExhausted:` you likely need to allocate your Docker Desktop to use more RAM.
+1. `failed to solve: ResourceExhausted:` you likely need to configure your Docker Desktop to use more RAM.
