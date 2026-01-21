@@ -41,6 +41,8 @@ cd 5g-core
 ```
 *this script installs everything needed.*
 
+**Note: This repo is quite large. The images are ~4 GB and the container requires ~16gb memory allocation to run.**
+
 3. run the following:
 ```bash
 ./scripts/start.sh
