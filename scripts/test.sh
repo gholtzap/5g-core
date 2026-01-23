@@ -7,12 +7,13 @@ if ! command -v gum &> /dev/null; then
     exit 1
 fi
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$SCRIPT_DIR/helpers/common.sh"
+
 gum style \
 	--foreground 212 --border-foreground 212 --border double \
 	--align center --width 50 --margin "1 2" --padding "2 4" \
 	'5G CORE' 'Automated Test Script'
-
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 TEST_DIR="/tmp/5g-core-test-$(date +%s)"
 
@@ -63,16 +64,6 @@ cd "$TEST_DIR"
 
 gum style --foreground 86 --bold "[3/6] Running setup with defaults..."
 echo ""
-
-check_command() {
-    if command -v $1 &> /dev/null; then
-        gum style --foreground 42 "✓ $2 is installed"
-        return 0
-    else
-        gum style --foreground 196 "✗ $2 is not installed"
-        return 1
-    fi
-}
 
 gum style --foreground 220 "Checking prerequisites..."
 prerequisites_met=true
@@ -129,21 +120,7 @@ gum style --foreground 220 "Starting MongoDB..."
 docker compose up -d mongodb
 
 gum style --foreground 220 "Waiting for MongoDB to be ready..."
-max_attempts=30
-attempt=0
-while [ $attempt -lt $max_attempts ]; do
-    if docker compose exec -T mongodb mongosh --quiet --eval "db.adminCommand('ping').ok" 2>/dev/null | grep -q "1"; then
-        gum style --foreground 42 "✓ MongoDB ready"
-        break
-    fi
-    attempt=$((attempt + 1))
-    sleep 1
-done
-
-if [ $attempt -eq $max_attempts ]; then
-    gum style --foreground 196 "✗ MongoDB failed to start"
-    exit 1
-fi
+wait_for_mongodb 30 || exit 1
 echo ""
 
 gum style --foreground 220 "Provisioning test subscriber..."

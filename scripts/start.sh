@@ -2,6 +2,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/helpers/common.sh"
+
 gum style \
 	--foreground 212 --border-foreground 212 --border double \
 	--align center --width 50 --margin "1 2" --padding "2 4" \
@@ -11,29 +14,9 @@ preflight_checks() {
     gum style --foreground 86 --bold "Pre-flight validation..."
     echo ""
 
-    if ! command -v docker &> /dev/null; then
-        gum style --foreground 196 "✗ Docker is not installed"
-        gum style --foreground 208 "  Install from: https://www.docker.com/get-started"
-        exit 1
-    fi
-
-    if ! docker info &> /dev/null; then
-        gum style --foreground 196 "✗ Docker daemon is not running"
-        gum style --foreground 208 "  Start Docker Desktop and try again"
-        exit 1
-    fi
-
-    mem_bytes=$(docker info --format '{{.MemTotal}}' 2>/dev/null || echo "0")
-    mem_gb=$((mem_bytes / 1024 / 1024 / 1024))
-
-    if [ "$mem_gb" -lt 16 ]; then
-        gum style --foreground 196 "✗ Docker memory is too low: ${mem_gb}GB (16GB+ required)"
-        gum style --foreground 208 "  Configure Docker Desktop → Settings → Resources → Memory"
-        gum style --foreground 208 "  Set memory to at least 16GB to avoid build failures"
-        exit 1
-    fi
-
-    gum style --foreground 42 "✓ Docker is running with ${mem_gb}GB memory"
+    check_docker_installed || exit 1
+    check_docker_running || exit 1
+    check_docker_memory 16 || exit 1
     echo ""
 }
 
@@ -81,11 +64,7 @@ do_update_build() {
         gum style --foreground 220 "Building updated services with --no-cache: ${changed_services[*]}"
         for service in "${changed_services[@]}"; do
             if ! docker compose build --no-cache "$service"; then
-                gum style --foreground 196 "✗ Build failed for $service"
-                gum style --foreground 208 "Recovery suggestions:"
-                gum style --foreground 208 "  1. Check logs above for specific errors"
-                gum style --foreground 208 "  2. Try: docker compose build --no-cache $service"
-                gum style --foreground 208 "  3. Clean old images: docker system prune"
+                print_build_failure "$service"
                 exit 1
             fi
         done
@@ -98,11 +77,7 @@ do_update_build() {
 
     gum style --foreground 220 "Building remaining services..."
     if ! docker compose build; then
-        gum style --foreground 196 "✗ Docker build failed"
-        gum style --foreground 208 "Recovery suggestions:"
-        gum style --foreground 208 "  1. Check Docker resources (CPU/Memory/Disk)"
-        gum style --foreground 208 "  2. Try: docker compose build --no-cache"
-        gum style --foreground 208 "  3. Clean old images: docker system prune"
+        print_build_failure
         exit 1
     fi
     gum style --foreground 42 "✓ Build complete"
@@ -129,21 +104,13 @@ do_clean_start() {
     if gum confirm "Rebuild with --no-cache?"; then
         gum style --foreground 220 "Building all services with --no-cache..."
         if ! docker compose build --no-cache; then
-            gum style --foreground 196 "✗ Docker build failed"
-            gum style --foreground 208 "Recovery suggestions:"
-            gum style --foreground 208 "  1. Check Docker resources (CPU/Memory/Disk)"
-            gum style --foreground 208 "  2. Clean old images: docker system prune"
-            gum style --foreground 208 "  3. Restart Docker Desktop"
+            print_build_failure
             exit 1
         fi
     else
         gum style --foreground 220 "Building all services..."
         if ! docker compose build; then
-            gum style --foreground 196 "✗ Docker build failed"
-            gum style --foreground 208 "Recovery suggestions:"
-            gum style --foreground 208 "  1. Try with --no-cache: docker compose build --no-cache"
-            gum style --foreground 208 "  2. Check Docker resources (CPU/Memory/Disk)"
-            gum style --foreground 208 "  3. Clean old images: docker system prune"
+            print_build_failure
             exit 1
         fi
     fi
@@ -183,21 +150,13 @@ do_custom() {
             if gum confirm "Use --no-cache for all?"; then
                 gum style --foreground 220 "Building all services with --no-cache..."
                 if ! docker compose build --no-cache; then
-                    gum style --foreground 196 "✗ Docker build failed"
-                    gum style --foreground 208 "Recovery suggestions:"
-                    gum style --foreground 208 "  1. Check Docker resources (CPU/Memory/Disk)"
-                    gum style --foreground 208 "  2. Clean old images: docker system prune"
-                    gum style --foreground 208 "  3. Restart Docker Desktop"
+                    print_build_failure
                     exit 1
                 fi
             else
                 gum style --foreground 220 "Building all services..."
                 if ! docker compose build; then
-                    gum style --foreground 196 "✗ Docker build failed"
-                    gum style --foreground 208 "Recovery suggestions:"
-                    gum style --foreground 208 "  1. Try with --no-cache: docker compose build --no-cache"
-                    gum style --foreground 208 "  2. Check Docker resources (CPU/Memory/Disk)"
-                    gum style --foreground 208 "  3. Clean old images: docker system prune"
+                    print_build_failure
                     exit 1
                 fi
             fi
@@ -278,8 +237,6 @@ detect_changed_submodules() {
                 udm) changed_services+=("udm") ;;
                 smf) changed_services+=("smf") ;;
                 upf) changed_services+=("upf") ;;
-                scp) changed_services+=("scp") ;;
-                sepp) changed_services+=("sepp") ;;
             esac
         done < <(diff /tmp/submodules_before.txt /tmp/submodules_after.txt | grep '^>' | awk '{print $2}')
     fi
@@ -305,11 +262,7 @@ commit_push() {
 rebuild_all_no_cache() {
     gum style --foreground 220 "Rebuilding all services with --no-cache..."
     if ! docker compose build --no-cache; then
-        gum style --foreground 196 "✗ Docker build failed"
-        gum style --foreground 208 "Recovery suggestions:"
-        gum style --foreground 208 "  1. Check Docker resources (CPU/Memory/Disk)"
-        gum style --foreground 208 "  2. Clean old images: docker system prune"
-        gum style --foreground 208 "  3. Restart Docker Desktop"
+        print_build_failure
         exit 1
     fi
     gum style --foreground 42 "✓ All services rebuilt"
@@ -324,26 +277,8 @@ check_mongodb() {
         gum style --foreground 220 "Starting MongoDB..."
         docker compose up -d mongodb
         gum style --foreground 220 "Waiting for MongoDB to be ready..."
-
-        max_attempts=30
-        attempt=0
-        while [ $attempt -lt $max_attempts ]; do
-            if docker compose exec -T mongodb mongosh --quiet --eval "db.adminCommand('ping').ok" 2>/dev/null | grep -q "1"; then
-                gum style --foreground 42 "✓ MongoDB ready"
-                echo ""
-                return 0
-            fi
-            attempt=$((attempt + 1))
-            sleep 1
-        done
-
-        gum style --foreground 196 "✗ MongoDB failed to become ready after ${max_attempts}s"
-        gum style --foreground 208 "Recovery suggestions:"
-        gum style --foreground 208 "  1. Check logs: docker compose logs mongodb"
-        gum style --foreground 208 "  2. Restart MongoDB: docker compose restart mongodb"
-        gum style --foreground 208 "  3. Clean volumes: docker compose down -v"
+        wait_for_mongodb 30 || return 1
         echo ""
-        return 1
     fi
 }
 
@@ -375,40 +310,24 @@ start_services() {
     if [[ $run_mode == "Foreground (show logs)" ]]; then
         if [[ $start_webui == "No" ]]; then
             if ! docker compose up --scale web-ui=0; then
-                gum style --foreground 196 "✗ Services failed to start"
-                gum style --foreground 208 "Recovery suggestions:"
-                gum style --foreground 208 "  1. Check logs above for specific errors"
-                gum style --foreground 208 "  2. Try: docker compose down && ./scripts/start.sh"
-                gum style --foreground 208 "  3. Check service health: docker compose ps"
+                print_start_failure true
                 exit 1
             fi
         else
             if ! docker compose up; then
-                gum style --foreground 196 "✗ Services failed to start"
-                gum style --foreground 208 "Recovery suggestions:"
-                gum style --foreground 208 "  1. Check logs above for specific errors"
-                gum style --foreground 208 "  2. Try: docker compose down && ./scripts/start.sh"
-                gum style --foreground 208 "  3. Check service health: docker compose ps"
+                print_start_failure true
                 exit 1
             fi
         fi
     else
         if [[ $start_webui == "No" ]]; then
             if ! docker compose up -d --scale web-ui=0; then
-                gum style --foreground 196 "✗ Services failed to start"
-                gum style --foreground 208 "Recovery suggestions:"
-                gum style --foreground 208 "  1. Check logs: docker compose logs"
-                gum style --foreground 208 "  2. Check service health: docker compose ps"
-                gum style --foreground 208 "  3. Try: docker compose down && ./scripts/start.sh"
+                print_start_failure false
                 exit 1
             fi
         else
             if ! docker compose up -d; then
-                gum style --foreground 196 "✗ Services failed to start"
-                gum style --foreground 208 "Recovery suggestions:"
-                gum style --foreground 208 "  1. Check logs: docker compose logs"
-                gum style --foreground 208 "  2. Check service health: docker compose ps"
-                gum style --foreground 208 "  3. Try: docker compose down && ./scripts/start.sh"
+                print_start_failure false
                 exit 1
             fi
         fi
