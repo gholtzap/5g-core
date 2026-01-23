@@ -33,6 +33,17 @@ trap cleanup EXIT
 gum style --foreground 86 --bold "[1/6] Creating test environment..."
 echo ""
 
+gum style --foreground 220 "Checking for existing 5G core services..."
+if docker ps --format '{{.Names}}' | grep -qE '^(amf|nrf|ausf|udm|nssf|smf|upf|mongodb|ueransim)'; then
+    gum style --foreground 220 "Found running 5G core services. Stopping them first..."
+    (cd "$REPO_ROOT" && docker compose down 2>/dev/null || true)
+    sleep 2
+    gum style --foreground 42 "✓ Existing services stopped"
+else
+    gum style --foreground 42 "✓ No conflicting services found"
+fi
+echo ""
+
 gum style --foreground 220 "Creating test directory: $TEST_DIR"
 mkdir -p "$TEST_DIR"
 gum style --foreground 42 "✓ Test directory created"
