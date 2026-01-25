@@ -56,11 +56,58 @@ echo ""
 gum style --foreground 220 "Copying current repository state..."
 rsync -a --exclude='.git' --exclude='node_modules' --exclude='target' \
     --exclude='UERANSIM' --exclude='Open5GS' --exclude='test-free5gc' \
+    --exclude='amf' --exclude='ausf' --exclude='nrf' --exclude='nssf' \
+    --exclude='smf' --exclude='udm' --exclude='upf' --exclude='scp' \
+    --exclude='sepp' --exclude='smsf' \
     "$REPO_ROOT/" "$TEST_DIR/"
 gum style --foreground 42 "✓ Repository copied"
 echo ""
 
 cd "$TEST_DIR"
+
+gum style --foreground 220 "Verifying required directories..."
+if [ ! -d "docker" ]; then
+    gum style --foreground 196 "✗ docker directory was not copied"
+    ls -la
+    exit 1
+fi
+if [ ! -d "config" ]; then
+    gum style --foreground 196 "✗ config directory was not copied"
+    exit 1
+fi
+
+gum style --foreground 244 "Copying docker subdirectories..."
+DOCKER_SUBDIRS=(amf ausf nrf nssf smf udm upf scp sepp smsf)
+for subdir in "${DOCKER_SUBDIRS[@]}"; do
+    if [ ! -d "docker/$subdir" ]; then
+        if [ -d "$REPO_ROOT/docker/$subdir" ]; then
+            cp -r "$REPO_ROOT/docker/$subdir" docker/
+            gum style --foreground 42 "✓ Copied docker/$subdir"
+        else
+            gum style --foreground 196 "✗ docker/$subdir not found in source repo"
+            exit 1
+        fi
+    fi
+done
+
+gum style --foreground 42 "✓ Required directories present"
+echo ""
+
+gum style --foreground 220 "Copying config .env files..."
+for nf in ausf udm nssf scp smsf smf; do
+    if [ ! -f "config/$nf/.env" ]; then
+        if [ -f "$REPO_ROOT/config/$nf/.env" ]; then
+            mkdir -p "config/$nf"
+            cp "$REPO_ROOT/config/$nf/.env" "config/$nf/.env"
+            gum style --foreground 42 "✓ Copied config/$nf/.env"
+        else
+            gum style --foreground 196 "✗ config/$nf/.env not found in source repo"
+            exit 1
+        fi
+    fi
+done
+gum style --foreground 42 "✓ Config .env files copied"
+echo ""
 
 gum style --foreground 86 --bold "[3/6] Running setup with defaults..."
 echo ""
@@ -79,19 +126,37 @@ fi
 gum style --foreground 42 "✓ Prerequisites met"
 echo ""
 
-gum style --foreground 220 "Initializing git submodules..."
-git init
-git submodule init
-git submodule update --init --recursive
-gum style --foreground 42 "✓ Submodules initialized"
+gum style --foreground 220 "Cloning required repositories..."
 echo ""
 
-if [ ! -d "UERANSIM" ]; then
-    gum style --foreground 220 "Cloning UERANSIM..."
-    git clone --depth 1 https://github.com/aligungr/UERANSIM.git
-    gum style --foreground 42 "✓ UERANSIM cloned"
-    echo ""
-fi
+clone_repo() {
+    local dir="$1"
+    local url="$2"
+    if [ ! -d "$dir" ]; then
+        gum style --foreground 244 "Cloning $dir..."
+        git clone --depth 1 "$url" "$dir" 2>&1 | sed 's/^/  /'
+        if [ ! -d "$dir" ]; then
+            gum style --foreground 196 "✗ Failed to clone $dir"
+            exit 1
+        fi
+    fi
+}
+
+clone_repo "UERANSIM" "https://github.com/aligungr/UERANSIM.git"
+clone_repo "amf" "https://github.com/gholtzap/amf.git"
+clone_repo "ausf" "https://github.com/gholtzap/ausf"
+clone_repo "nrf" "https://github.com/gholtzap/nrf.git"
+clone_repo "nssf" "https://github.com/gholtzap/nssf"
+clone_repo "smf" "https://github.com/gholtzap/smf"
+clone_repo "udm" "https://github.com/gholtzap/udm"
+clone_repo "upf" "https://github.com/gholtzap/upf"
+clone_repo "scp" "https://github.com/gholtzap/scp"
+clone_repo "sepp" "https://github.com/gholtzap/SEPP.git"
+clone_repo "smsf" "https://github.com/gholtzap/smsf.git"
+
+echo ""
+gum style --foreground 42 "✓ All repositories cloned"
+echo ""
 
 if [ -f .env.example ] && [ ! -f .env ]; then
     gum style --foreground 220 "Creating .env from template..."
@@ -171,8 +236,28 @@ provision().catch(console.error);
 PROVISION_EOF
 
 docker cp "$TEMP_SCRIPT" "$MONGODB_CONTAINER:/tmp/provision.js"
-docker exec "$MONGODB_CONTAINER" sh -c "which npm > /dev/null 2>&1 || (apt-get update -qq && apt-get install -y -qq nodejs npm > /dev/null 2>&1)"
-docker exec "$MONGODB_CONTAINER" node /tmp/provision.js > /dev/null 2>&1
+
+gum style --foreground 244 "Installing Node.js in MongoDB container..."
+if ! docker exec "$MONGODB_CONTAINER" sh -c "which npm > /dev/null 2>&1 || (apt-get update -qq && apt-get install -y -qq nodejs npm)"; then
+    gum style --foreground 196 "✗ Failed to install Node.js"
+    exit 1
+fi
+
+gum style --foreground 244 "Installing mongodb npm package..."
+docker exec "$MONGODB_CONTAINER" sh -c "cd /tmp && npm init -y > /dev/null 2>&1"
+if ! docker exec "$MONGODB_CONTAINER" sh -c "cd /tmp && npm install mongodb@4 > /dev/null 2>&1"; then
+    gum style --foreground 196 "✗ Failed to install mongodb package"
+    exit 1
+fi
+
+gum style --foreground 244 "Running provisioning script..."
+if ! docker exec "$MONGODB_CONTAINER" sh -c "cd /tmp && node provision.js"; then
+    gum style --foreground 196 "✗ Provisioning script failed"
+    docker exec "$MONGODB_CONTAINER" rm /tmp/provision.js || true
+    rm "$TEMP_SCRIPT"
+    exit 1
+fi
+
 docker exec "$MONGODB_CONTAINER" rm /tmp/provision.js
 rm "$TEMP_SCRIPT"
 gum style --foreground 42 "✓ Subscriber provisioned"

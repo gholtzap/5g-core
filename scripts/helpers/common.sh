@@ -54,7 +54,8 @@ wait_for_mongodb() {
     local attempt=0
 
     while [ $attempt -lt $max_attempts ]; do
-        if docker compose exec -T mongodb mongosh --quiet --eval "db.adminCommand('ping').ok" 2>/dev/null | grep -q "1"; then
+        local health_status=$(docker inspect --format='{{.State.Health.Status}}' mongodb 2>/dev/null || echo "")
+        if [ "$health_status" = "healthy" ]; then
             gum style --foreground 42 "✓ MongoDB ready"
             return 0
         fi
