@@ -22,6 +22,13 @@ cleanup() {
         gum style --foreground 220 "Cleaning up test environment..."
         cd "$REPO_ROOT"
         if [ -d "$TEST_DIR" ]; then
+            if [ "${SAVE_LOGS_ON_FAILURE:-false}" = "true" ]; then
+                LOG_DIR="$REPO_ROOT/test-logs-$(date +%s)"
+                mkdir -p "$LOG_DIR"
+                gum style --foreground 220 "Saving logs to $LOG_DIR..."
+                (cd "$TEST_DIR" && docker compose logs > "$LOG_DIR/all-services.log" 2>&1)
+                gum style --foreground 42 "✓ Logs saved to $LOG_DIR"
+            fi
             (cd "$TEST_DIR" && docker compose down -v 2>/dev/null || true)
         fi
         rm -rf "$TEST_DIR"
@@ -93,20 +100,21 @@ done
 gum style --foreground 42 "✓ Required directories present"
 echo ""
 
-gum style --foreground 220 "Copying config .env files..."
-for nf in ausf udm nssf scp smsf smf; do
-    if [ ! -f "config/$nf/.env" ]; then
-        if [ -f "$REPO_ROOT/config/$nf/.env" ]; then
-            mkdir -p "config/$nf"
-            cp "$REPO_ROOT/config/$nf/.env" "config/$nf/.env"
-            gum style --foreground 42 "✓ Copied config/$nf/.env"
+gum style --foreground 220 "Verifying and copying config files..."
+for nf in ausf udm nssf scp smsf smf amf; do
+    if [ -d "$REPO_ROOT/config/$nf" ]; then
+        mkdir -p "config/$nf"
+        if [ "$(ls -A "$REPO_ROOT/config/$nf" 2>/dev/null)" ]; then
+            cp -r "$REPO_ROOT/config/$nf/". "config/$nf/"
+            gum style --foreground 42 "✓ Copied config/$nf/ ($(ls -A config/$nf | wc -l | tr -d ' ') files)"
         else
-            gum style --foreground 196 "✗ config/$nf/.env not found in source repo"
-            exit 1
+            gum style --foreground 220 "  No files in config/$nf/"
         fi
+    else
+        gum style --foreground 244 "  Skipping config/$nf/ (not found)"
     fi
 done
-gum style --foreground 42 "✓ Config .env files copied"
+gum style --foreground 42 "✓ Config files verified"
 echo ""
 
 gum style --foreground 86 --bold "[3/6] Running setup with defaults..."
@@ -292,11 +300,14 @@ for service in $services; do
 
     if ! docker compose ps "$service" | grep -q "Up"; then
         gum style --foreground 196 "✗ $service is not running"
+        gum style --foreground 244 "Last 30 lines of $service logs:"
+        docker compose logs --tail=30 "$service" 2>&1 | sed 's/^/  /'
+        echo ""
         error_found=true
         continue
     fi
 
-    error_logs=$(docker compose logs "$service" 2>&1 | grep -iE "error|fatal|panic|exception" | grep -viE "error_code.*0|no error|Sessions collection is not set up|NamespaceNotFound.*config.system.sessions" || true)
+    error_logs=$(docker compose logs "$service" 2>&1 | grep -iE "error|fatal|panic|exception" | grep -viE "error_code.*0|no error|Sessions collection is not set up|NamespaceNotFound.*config.system.sessions|Constraint check result: 0|Opening WiredTiger|Cell selection failure, no suitable or acceptable cell found" || true)
 
     if [ -n "$error_logs" ]; then
         gum style --foreground 196 "✗ Errors found in $service:"
@@ -311,6 +322,7 @@ done
 echo ""
 
 if [ "$error_found" = true ]; then
+    SAVE_LOGS_ON_FAILURE=true
     gum style \
         --foreground 196 --border-foreground 196 --border double \
         --align center --width 50 --margin "1 2" --padding "2 4" \
